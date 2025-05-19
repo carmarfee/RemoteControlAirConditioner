@@ -18,8 +18,8 @@ const uint8_t seg7code[10]={ 0xFC,0x0C,0xDA,0xF2,0x66,0xB6,0xBE,0xE0,0xFE,0xE6};
 uint8_t LED_Buffer[8]={0};
 
 /* 声明库函数 */
-uint8_t setLEDBuffer(uint8_t index, uint8_t value);
-void updateLED();
+static uint8_t setLEDBuffer(uint8_t index, uint8_t value);
+static void updateLED();
 
 /*******************************************************************************
 * Function Name  : initLED
@@ -41,7 +41,8 @@ void initLED() {
 * Description    : 接口函数 - 用指定的室温更新LED
 * Input          : target - 取值整数16-30
 * Output         : None
-* Return         : OK - 0; Error - 1
+* Return         : OK - 0
+*                  Error - 1
 * Attention      : None
 *******************************************************************************/
 uint8_t updateLED_T(uint8_t target) {
@@ -89,7 +90,8 @@ uint8_t updateLED_T(uint8_t target) {
 * Description    : 接口函数 - 用实际的室温更新LED
 * Input          : actual - 取值整数0-50
 * Output         : None
-* Return         : OK - 0; Error - 1
+* Return         : OK - 0
+*                  Error - 1
 * Attention      : None
 *******************************************************************************/
 uint8_t updateLED_A(uint8_t actual) {
@@ -138,11 +140,12 @@ uint8_t updateLED_A(uint8_t actual) {
 * Input          : index - 取值0-7，LED_Buffer索引值
 *                  value - 取值0-9，LED_Buffer值(seg7code索引值)
 * Output         : None
-* Return         : OK - 0; Error - 1
+* Return         : OK - 0
+*                  Error - 1
 * Attention      : None
 *******************************************************************************/
 
-uint8_t setLEDBuffer(uint8_t index, uint8_t value) {
+static uint8_t setLEDBuffer(uint8_t index, uint8_t value) {
     if (!(index >= 0 && index <= 7) || !(value >= 0 && value <= 9)) {
         #if DEBUG
             #include "stdio.h"
@@ -163,6 +166,6 @@ uint8_t setLEDBuffer(uint8_t index, uint8_t value) {
 * Attention      : None
 *******************************************************************************/
 
-void updateLED() {
+static void updateLED() {
 	I2C_ZLG7290_Write(&hi2c1,0x70,ZLG_WRITE_ADDRESS_BEGIN,LED_Buffer,BUFFER_SIZE_LED);
 }
