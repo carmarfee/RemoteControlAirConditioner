@@ -1,5 +1,8 @@
 /* 请使用此文件代替zlg7290.c */
 #include "led.h"
+#if DEBUG
+    #include "stdio.h"
+#endif
 
 #define I2C_Open_FLAG_TIMEOUT         ((uint32_t)0x1000)
 #define I2C_Open_LONG_TIMEOUT         ((uint32_t)0xffff)
@@ -22,7 +25,7 @@ uint8_t LED_Buffer[8]={0};
 void I2C_ZLG7290_WriteOneByte(I2C_HandleTypeDef *I2Cx,uint8_t I2C_Addr,uint8_t addr,uint8_t value);
 void I2C_ZLG7290_Write(I2C_HandleTypeDef *I2Cx,uint8_t I2C_Addr,uint8_t addr,uint8_t *buf,uint8_t num);
 uint8_t setLEDBuffer(uint8_t index, uint8_t value);
-uint8_t updateLED();
+void updateLED();
 
 /*******************************************************************************
 * Function Name  : initLED
@@ -49,33 +52,89 @@ void initLED() {
 *******************************************************************************/
 uint8_t updateLED_T(uint8_t target) {
     if (target < 16 || target > 30) {
+        #if DEBUG
+                printf("updateLED_T() - 输入的参数有误!\n");
+        #endif
         return 1;
     }
 
-    setLEDBuffer(2, target / 10);
-    setLEDBuffer(3, target % 10);
+    const uint8_t ten_digit = target / 10;
+    const uint8_t single_digit = target % 10;
 
-    updateLED();
+    uint8_t is_revised = 0;
+    if (LED_Buffer[2] != ten_digit) {
+        if (setLEDBuffer(2, ten_digit)) {
+            #if DEBUG
+                printf("updateLED_T() - setLEDBuffer(2, ten_digit)操作出错了!\n");
+            #endif
+            return 1;
+        }
+            
+        is_revised = 1;
+    }
+    if (LED_Buffer[3] != single_digit) {
+        if (setLEDBuffer(3, single_digit)) {
+            #if DEBUG
+                printf("updateLED_T() - setLEDBuffer(3, single_digit)操作出错了!\n");
+            #endif
+            return 1;
+        }
+            
+        is_revised = 1;
+    }
+    
+    if (is_revised) {
+        updateLED();
+    }
+        
     return 0;
 }
 
 /*******************************************************************************
 * Function Name  : updateLED_A
 * Description    : 用实际的室温更新LED
-* Input          : actual - 取值整数16-30
+* Input          : actual - 取值整数0-50
 * Output         : None
 * Return         : OK - 0; Error - 1
 * Attention      : None
 *******************************************************************************/
 uint8_t updateLED_A(uint8_t actual) {
-    if (actual < 16 || actual > 30) {
+    if (actual > 50) {
+        #if DEBUG
+                printf("updateLED_A() - 输入的参数有误!\n");
+        #endif
         return 1;
     }
 
-    setLEDBuffer(6, actual / 10);
-    setLEDBuffer(7, actual % 10);
-
-    updateLED();
+    const uint8_t ten_digit = actual / 10;
+    const uint8_t single_digit = actual % 10;
+    
+    uint8_t is_revised = 0;
+    if (LED_Buffer[6] != ten_digit) {
+        if (setLEDBuffer(6, ten_digit)) {
+            #if DEBUG
+                printf("updateLED_A() - setLEDBuffer(6, ten_digit)操作出错了!\n");
+            #endif
+            return 1;
+        }
+            
+        is_revised = 1;
+    }
+    if (LED_Buffer[7] != single_digit) {
+        if (setLEDBuffer(7, single_digit)) {
+            #if DEBUG
+                printf("updateLED_A() - setLEDBuffer(7, single_digit)操作出错了!\n");
+            #endif
+            return 1;
+        }
+            
+        is_revised = 1;
+    }
+    
+    if (is_revised) {
+        updateLED();
+    }
+        
     return 0;
 }
 
@@ -93,7 +152,7 @@ uint8_t setLEDBuffer(uint8_t index, uint8_t value) {
     if (!(index >= 0 && index <= 7) || !(value >= 0 && value <= 9)) {
         #if DEBUG
             #include "stdio.h"
-            printf("setLEDBuffer() - 输入的参数有误!");
+            printf("setLEDBuffer() - 输入的参数有误!\n");
         #endif
         return 1;
     }
@@ -110,7 +169,7 @@ uint8_t setLEDBuffer(uint8_t index, uint8_t value) {
 * Attention      : None
 *******************************************************************************/
 
-uint8_t updateLED() {
+void updateLED() {
 	I2C_ZLG7290_Write(&hi2c1,0x70,ZLG_WRITE_ADDRESS_BEGIN,LED_Buffer,BUFFER_SIZE_LED);
 }
 
