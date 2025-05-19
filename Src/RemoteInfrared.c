@@ -12,32 +12,32 @@ __IO Remote_Infrared_data_union RemoteInfrareddata;
 
 
 /************************************************************************
-//´¦ÀíºìÍâ½ÓÊÕ  
--------------------------Ð­Òé--------------------------
-¿ªÊ¼À­µÍ9ms,½Ó×ÅÊÇÒ»¸ö4.5msµÄ¸ßÂö³å,Í¨ÖªÆ÷¼þ¿ªÊ¼´«ËÍÊý¾ÝÁË
-½Ó×ÅÊÇ·¢ËÍ4¸ö8Î»¶þ½øÖÆÂë,µÚÒ»¶þ¸öÊÇÒ£¿ØÊ¶±ðÂë(REMOTE_ID),µÚÒ»¸öÎª
-ÕýÂë(0),µÚ¶þ¸öÎª·´Âë(255),½Ó×ÅÁ½¸öÊý¾ÝÊÇ¼üÖµ,µÚÒ»¸öÎªÕýÂë
-µÚ¶þ¸öÎª·´Âë.·¢ËÍÍêºó40ms,Ò£¿ØÔÙ·¢ËÍÒ»¸ö9msµÍ,2ms¸ßµÄÂö³å,
-±íÊ¾°´¼üµÄ´ÎÊý,³öÏÖÒ»´ÎÔòÖ¤Ã÷Ö»°´ÏÂÁËÒ»´Î,Èç¹û³öÏÖ¶à´Î,Ôò¿É
-ÒÔÈÏÎªÊÇ³ÖÐø°´ÏÂ¸Ã¼ü.
+//å¤„ç†çº¢å¤–æŽ¥æ”¶  
+-------------------------åè®®--------------------------
+å¼€å§‹æ‹‰ä½Ž9ms,æŽ¥ç€æ˜¯ä¸€ä¸ª4.5msçš„é«˜è„‰å†²,é€šçŸ¥å™¨ä»¶å¼€å§‹ä¼ é€æ•°æ®äº†
+æŽ¥ç€æ˜¯å‘é€4ä¸ª8ä½äºŒè¿›åˆ¶ç ,ç¬¬ä¸€äºŒä¸ªæ˜¯é¥æŽ§è¯†åˆ«ç (REMOTE_ID),ç¬¬ä¸€ä¸ªä¸º
+æ­£ç (0),ç¬¬äºŒä¸ªä¸ºåç (255),æŽ¥ç€ä¸¤ä¸ªæ•°æ®æ˜¯é”®å€¼,ç¬¬ä¸€ä¸ªä¸ºæ­£ç 
+ç¬¬äºŒä¸ªä¸ºåç .å‘é€å®ŒåŽ40ms,é¥æŽ§å†å‘é€ä¸€ä¸ª9msä½Ž,2msé«˜çš„è„‰å†²,
+è¡¨ç¤ºæŒ‰é”®çš„æ¬¡æ•°,å‡ºçŽ°ä¸€æ¬¡åˆ™è¯æ˜ŽåªæŒ‰ä¸‹äº†ä¸€æ¬¡,å¦‚æžœå‡ºçŽ°å¤šæ¬¡,åˆ™å¯
+ä»¥è®¤ä¸ºæ˜¯æŒç»­æŒ‰ä¸‹è¯¥é”®.
 
-*Ãû³Æ: Remote_Infrared_KEY_ISR(INT11_vect )													 
-*¹¦ÄÜ: INT0ÖÐ¶Ï·þÎñ³ÌÐò		       									
-*²ÎÊý: ÎÞ					          									
-*·µ»Ø: ÎÞ		                           								
+*åç§°: Remote_Infrared_KEY_ISR(INT11_vect )													 
+*åŠŸèƒ½: INT0ä¸­æ–­æœåŠ¡ç¨‹åº		       									
+*å‚æ•°: æ— 					          									
+*è¿”å›ž: æ— 		                           								
 *************************************************************************/	
-// ¼ì²âÂö³å¿í¶È×î³¤Âö¿íÎª5ms
+// æ£€æµ‹è„‰å†²å®½åº¦æœ€é•¿è„‰å®½ä¸º5ms
 const uint32_t TIME_DELAY_6MS = 60;
 const uint32_t TIME_DELAY_10MS = 100;
 void Remote_Infrared_KEY_ISR(void)
 {
-	static __IO uint8_t  bBitCounter = 0; //¼üÅÌÖ¡Î»¼ÆÊý
+	static __IO uint8_t  bBitCounter = 0; //é”®ç›˜å¸§ä½è®¡æ•°
   static __IO uint32_t bKeyCode = 0;
 	bBitCounter++;
 
-	if(bBitCounter == 1)        // ¿ªÊ¼À­µÍ9ms
+	if(bBitCounter == 1)        // å¼€å§‹æ‹‰ä½Ž9ms
 	{
-        if(Remote_Infrared_DAT_INPUT) // ¸ßµçÆ½ÎÞÐ§
+        if(Remote_Infrared_DAT_INPUT) // é«˜ç”µå¹³æ— æ•ˆ
         {
             bBitCounter = 0;
         }
@@ -46,7 +46,7 @@ void Remote_Infrared_KEY_ISR(void)
             GlobalTimingDelay100us = TIME_DELAY_10MS;
         }
 	}
-	else if(bBitCounter == 2)   // 4.5msµÄ¸ßÂö³å
+	else if(bBitCounter == 2)   // 4.5msçš„é«˜è„‰å†²
 	{
         if(Remote_Infrared_DAT_INPUT)
         {
@@ -66,7 +66,7 @@ void Remote_Infrared_KEY_ISR(void)
             bBitCounter = 0;            
         }
 	}
-	else if(bBitCounter == 3)   // 4.5msµÄ¸ßÂö³å
+	else if(bBitCounter == 3)   // 4.5msçš„é«˜è„‰å†²
 	{
         if(Remote_Infrared_DAT_INPUT)
         {
@@ -77,7 +77,7 @@ void Remote_Infrared_KEY_ISR(void)
             if((GlobalTimingDelay100us > 5) && (GlobalTimingDelay100us < 20))
             {
                 GlobalTimingDelay100us = TIME_DELAY_6MS;
-                printf("Òýµ¼Âë");
+                printf("å¼•å¯¼ç ");
             }
             else if((GlobalTimingDelay100us > 32) && (GlobalTimingDelay100us < 46))
             {
@@ -94,7 +94,7 @@ void Remote_Infrared_KEY_ISR(void)
             }          
         }
 	}    
-	else if(bBitCounter > 3 && bBitCounter < 68) //½ÓÊÕ8Î»Êý¾Ý
+	else if(bBitCounter > 3 && bBitCounter < 68) //æŽ¥æ”¶8ä½æ•°æ®
 	{  
 
         if(Remote_Infrared_DAT_INPUT)
@@ -147,16 +147,16 @@ void Remote_Infrared_KEY_ISR(void)
 }
 
 /************************************************************************
-*Ãû³Æ: unsigned char Remote_Infrared_KeyDeCode(unsigned char bKeyCode)					 
-*¹¦ÄÜ: PS2¼üÅÌ½âÂë³ÌÐò®û		       									    
-*²ÎÊý: bKeyCode ¼üÅÌÂë 							
-*·µ»Ø: °´¼üµÄASIICÂë		                           								
+*åç§°: unsigned char Remote_Infrared_KeyDeCode(unsigned char bKeyCode)					 
+*åŠŸèƒ½: PS2é”®ç›˜è§£ç ç¨‹åºï¿½ï¿½		       									    
+*å‚æ•°: bKeyCode é”®ç›˜ç  							
+*è¿”å›ž: æŒ‰é”®çš„ASIICç 		                           								
 ************************************************************************/
 uint8_t Remote_Infrared_KeyDeCode(void)
 {
 //	uint8_t Key = 0xFF;
 
-	if (FlagGotKey == 1)//Í¨Âë
+	if (FlagGotKey == 1)//é€šç 
 	{
         FlagGotKey = 0;
         if((RemoteInfrareddata.RemoteInfraredDataStruct.bID == (uint8_t)~ RemoteInfrareddata.RemoteInfraredDataStruct.bIDNot)
@@ -169,7 +169,7 @@ uint8_t Remote_Infrared_KeyDeCode(void)
 					printf("ERROR  ");
 					break;
 				case 0x78:
-					  printf("É¾³ý   ");
+					  printf("åˆ é™¤   ");
 						break;
 				case 0x38:
 					printf("HTML5/FLASH    ");

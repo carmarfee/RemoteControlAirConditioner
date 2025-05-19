@@ -5,9 +5,9 @@
 
 
 /*
-brif:ÉèÖÃÉè±¸Ä£Ê½
-para:ConfReg ÅäÖÃ¼Ä´æÆ÷µØÖ·
-     Mode ĞèÒªÅäÖÃµÄÄ£Ê½
+brif:è®¾ç½®è®¾å¤‡æ¨¡å¼
+para:ConfReg é…ç½®å¯„å­˜å™¨åœ°å€
+     Mode éœ€è¦é…ç½®çš„æ¨¡å¼
 rev:EVL_OK success
     EVL_ER failed
 */
@@ -27,9 +27,9 @@ uint8_t LM75SetMode(uint8_t ConfReg, uint8_t Mode)
 }
 
 /*
-brif:¶ÁÈ¡Temp¼Ä´æÆ÷Öµ
+brif:è¯»å–Tempå¯„å­˜å™¨å€¼
 para:NULL
-rev:temp Temp¼Ä´æÆ÷ÖĞµÄÖµ(µÍ5Î»ÎŞĞ§)
+rev:temp Tempå¯„å­˜å™¨ä¸­çš„å€¼(ä½5ä½æ— æ•ˆ)
     EVL_ER failed
 */
 uint16_t LM75GetTempReg(void)
@@ -48,9 +48,9 @@ uint16_t LM75GetTempReg(void)
 }
 
 /*
-brif:Êµ¼ÊÎÂ¶È×ª»»º¯Êı
-para:Temp¼Ä´æÆ÷Öµ
-rev:TempValue ×ª»»ºóµÄÎÂ¶ÈÖµ
+brif:å®é™…æ¸©åº¦è½¬æ¢å‡½æ•°
+para:Tempå¯„å­˜å™¨å€¼
+rev:TempValue è½¬æ¢åçš„æ¸©åº¦å€¼
 */
 double LM75GetTempValue(uint16_t tempreg)
 {
