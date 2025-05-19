@@ -37,7 +37,7 @@
 #include "i2c.h"
 #include "LM75A.h"
 #include "usart.h"
-#include "zlg7290.h"
+#include "led.h"
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -47,6 +47,9 @@
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
+/* 20250519main */
+
+__IO uint32_t GlobalTimingDelay100us;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -78,9 +81,16 @@ int main(void)
   SystemClock_Config();
 
   /* Initialize all configured peripherals */
+  /* 
+    数码管：
+    温度：LM75A
+    直流电机：
+    红外：
+  */
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_USART1_UART_Init();
+  MX_TIM3_Init();
 
   /* USER CODE BEGIN 2 */
   LM75SetMode(CONF_ADDR, NORMOR_MODE);
@@ -148,6 +158,7 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
 int fputc(int ch, FILE *f)
 {
   uint8_t tmp[1] = {0};
@@ -155,7 +166,16 @@ int fputc(int ch, FILE *f)
   HAL_UART_Transmit(&huart1, tmp, 1, 10);
   return ch;
 }
+
 /* USER CODE END 4 */
+
+void HAL_SYSTICK_Callback(void)
+{
+  if (GlobalTimingDelay100us != 0)
+  {
+    GlobalTimingDelay100us--;
+  }
+}
 
 /**
  * @brief  This function is executed in case of error occurrence.

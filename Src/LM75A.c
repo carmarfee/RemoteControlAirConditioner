@@ -68,6 +68,25 @@ double LM75GetTempValue(uint16_t tempreg)
 	return TempValue;
 }
 
-
+/*******************************************************************************
+* Function Name  : LM75GetTempValue2
+* Description    : 直接获取温度值
+* Input          : index - 取值0-7，LED_Buffer索引值
+*                  value - 取值0-9，LED_Buffer值(seg7code索引值)
+* Output         : None
+* Return         : OK - 8位无符号整数温度值; Error - 0
+* Attention      : None
+*******************************************************************************/
+uint8_t LM75GetTempValue2() {
+	uint16_t Temp = LM75GetTempReg();
+	if (Temp == EVL_ER)
+    	return 0;
+	
+	if (Temp & (0x01 << 16)) {
+		return ((!Temp)+1) / 8;
+	} else {
+		return Temp / 8;
+	}
+}
 
 

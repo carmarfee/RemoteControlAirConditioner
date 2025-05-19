@@ -8,25 +8,25 @@
 
 #define DEBUG      0
 
-#define TEMP_ADDR  0x00   //ÎÂ¶È¼Ä´æÆ÷Ö¸ÕëµØÖ·
-#define CONF_ADDR  0x01   //ÅäÖÃ¼Ä´æÆ÷Ö¸ÕëµØÖ·
-#define THYST_ADDR 0x02   //ÖÍºó¼Ä´æÆ÷Ö¸ÕëµØÖ·
-#define TOS_ADDR   0x03   //¹ýÈÈ¹Ø¶Ï¼Ä´æÆ÷Ö¸ÕëµØÖ·
+#define TEMP_ADDR  0x00   //ï¿½Â¶È¼Ä´ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½Ö·
+#define CONF_ADDR  0x01   //ï¿½ï¿½ï¿½Ã¼Ä´ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½Ö·
+#define THYST_ADDR 0x02   //ï¿½Íºï¿½Ä´ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½Ö·
+#define TOS_ADDR   0x03   //ï¿½ï¿½ï¿½È¹Ø¶Ï¼Ä´ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½Ö·
 
-/*Æ÷¼þ¹¤×÷Ä£Ê½*/
-#define SHUTDOWN_MODE    0x01  //¹Ø¶ÏÄ£Ê½
-#define NORMOR_MODE      0x00  //Õý³£¹¤×÷Ä£Ê½
-/*OS¹¤×÷Ä£Ê½*/
-#define OSIRQ_MODE       0x02  //OSÖÐ¶ÏÄ£Ê½
-#define OSCOMP_MODE      0x00  //OS±È½ÏÆ÷Ä£Ê½
-/*OS¼«ÐÔÑ¡Ôñ*/
-#define OS_HIGH          0x04  //OS¸ßµçÆ½ÓÐÐ§
-#define OS_LOW           0x00  //OSµÍµçÆ½ÓÐÐ§
-/*OS¹ÊÕÏ¶ÓÁÐ*/
-#define EQ_DEFAULT       0x00  //Ä¬ÈÏÖµ    
+/*ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½*/
+#define SHUTDOWN_MODE    0x01  //ï¿½Ø¶ï¿½Ä£Ê½
+#define NORMOR_MODE      0x00  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½
+/*OSï¿½ï¿½ï¿½ï¿½Ä£Ê½*/
+#define OSIRQ_MODE       0x02  //OSï¿½Ð¶ï¿½Ä£Ê½
+#define OSCOMP_MODE      0x00  //OSï¿½È½ï¿½ï¿½ï¿½Ä£Ê½
+/*OSï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½*/
+#define OS_HIGH          0x04  //OSï¿½ßµï¿½Æ½ï¿½ï¿½Ð§
+#define OS_LOW           0x00  //OSï¿½Íµï¿½Æ½ï¿½ï¿½Ð§
+/*OSï¿½ï¿½ï¿½Ï¶ï¿½ï¿½ï¿½*/
+#define EQ_DEFAULT       0x00  //Ä¬ï¿½ï¿½Öµ    
 
-#define EVL_OK           0     //³É¹¦·µ»ØÖµ
-#define EVL_ER           1     //Ê§°Ü·µ»ØÖµ
+#define EVL_OK           0     //ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
+#define EVL_ER           1     //Ê§ï¿½Ü·ï¿½ï¿½ï¿½Öµ
 
 uint8_t LM75SetMode(uint8_t ConfReg, uint8_t Mode);
 uint16_t LM75GetTempReg(void);
