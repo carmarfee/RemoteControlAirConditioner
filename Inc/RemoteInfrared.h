@@ -2,15 +2,15 @@
 
 #define	Remote_Infrared_DAT_INPUT HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_15)
 
-typedef struct _Remote_Infrared_data_struct //¶¨ÒåºìÍâÏß½ÓÊÕµ½µÄÊı¾İ½á¹¹ÌåÀàĞÍ
+typedef struct _Remote_Infrared_data_struct //å®šä¹‰çº¢å¤–çº¿æ¥æ”¶åˆ°çš„æ•°æ®ç»“æ„ä½“ç±»å‹
 {
-	uint8_t bKeyCodeNot; //°´¼üµÄµÄASIICÂëÖµ
-	uint8_t bKeyCode; //shift¼ü°´ÏÂ±êÖ¾
-	uint8_t bIDNot; //¶ÏÂë±êÖ¾Î»
-	uint8_t bID; //ĞÂ¼ü±êÖ¾Î»
+	uint8_t bKeyCodeNot; //æŒ‰é”®çš„çš„ASIICç å€¼
+	uint8_t bKeyCode; //shifté”®æŒ‰ä¸‹æ ‡å¿—
+	uint8_t bIDNot; //æ–­ç æ ‡å¿—ä½
+	uint8_t bID; //æ–°é”®æ ‡å¿—ä½
 }Remote_Infrared_data_struct;
 
-typedef union _Remote_Infrared_data_union //¶¨ÒåºìÍâÏß½ÓÊÕµ½µÄÊı¾İ½á¹¹ÌåÀàĞÍ
+typedef union _Remote_Infrared_data_union //å®šä¹‰çº¢å¤–çº¿æ¥æ”¶åˆ°çš„æ•°æ®ç»“æ„ä½“ç±»å‹
 {
 	Remote_Infrared_data_struct RemoteInfraredDataStruct; 
 	uint32_t uiRemoteInfraredData; 

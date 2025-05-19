@@ -84,9 +84,9 @@ uint8_t getActualTemp() {
 	}
 
 	if (actualTemp & (0x01 << 16)) {
-		return ((!actualTemp) + 1) / 8;
+		return ((!actualTemp) + 1) >> 3;
 	} else {
-		return actualTemp / 8;
+		return actualTemp >> 3;
 	}
 }
 

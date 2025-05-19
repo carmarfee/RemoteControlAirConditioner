@@ -127,8 +127,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		{
 				i = 0;
 				HAL_GPIO_TogglePin(GPIOH,GPIO_PIN_15);
-				DC_Motor_Data =  DC_Motor_Count/4;  //´ú±íÈ¦Êý  
-				DC_Motor_Count = 0;  //¸³ÖµÎª0£¬´ÓÐÂ¿ªÊ¼¼ÆËãÊýÖµ
+				DC_Motor_Data =  DC_Motor_Count/4;  //ä»£è¡¨åœˆæ•°  
+				DC_Motor_Count = 0;  //èµ‹å€¼ä¸º0ï¼Œä»Žæ–°å¼€å§‹è®¡ç®—æ•°å€¼
 		}
 
   }
