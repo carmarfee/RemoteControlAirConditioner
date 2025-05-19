@@ -46,7 +46,7 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-
+__IO uint32_t GlobalTimingDelay100us;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -91,17 +91,17 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-    if ((Temp = LM75GetTempReg()) != EVL_ER)
-    {
-      LM75GetTempValue(Temp);
-    }
-    HAL_Delay(1000);
-    /* USER CODE END WHILE */
+  // while (1)
+  // {
+  //   if ((Temp = LM75GetTempReg()) != EVL_ER)
+  //   {
+  //     LM75GetTempValue(Temp);
+  //   }
+  //   HAL_Delay(1000);
+  //   /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
-  }
+  //   /* USER CODE BEGIN 3 */
+  // }
   /* USER CODE END 3 */
 }
 
@@ -156,6 +156,14 @@ int fputc(int ch, FILE *f)
   return ch;
 }
 /* USER CODE END 4 */
+
+void HAL_SYSTICK_Callback(void)
+{
+  if (GlobalTimingDelay100us != 0)
+  {
+    GlobalTimingDelay100us--;
+  }
+}
 
 /**
  * @brief  This function is executed in case of error occurrence.
