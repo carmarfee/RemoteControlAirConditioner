@@ -124,8 +124,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_GPIO_TogglePin(GPIOH, GPIO_PIN_15);
     DC_Motor_Data = DC_Motor_Count / 4; // ����Ȧ��
     DC_Motor_Count = 0;                 // ��ֵΪ0�����¿�ʼ������ֵ
+    LM75A_TimerReadTemperature();       // 100ms
   }
-  LM75A_TimerReadTemperature(); // 10ms
 }
 /* USER CODE END 1 */
 

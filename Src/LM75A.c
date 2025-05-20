@@ -8,7 +8,7 @@ volatile uint8_t LM75A_ReadReady = 0;	 // ��־λ��ָʾ�Ƿ�����
 
 /**
  * @brief 甚至温度传感器的工作模式
- * 
+ *
  * @param ConfReg 配置寄存器
  * @param Mode 工作状态字节
  * @return uint8_t 返回是否配置成功
@@ -72,38 +72,59 @@ double LM75GetTempValue(uint16_t tempreg)
 	return TempValue;
 }
 
-uint16_t Temp;
+#define BUFFER_SIZE 10 // Define the size of the buffer for moving average
+
+uint16_t tempBuffer[BUFFER_SIZE] = {0};
+uint8_t bufferIndex = 0;
+uint32_t tempSum = 0;
 /**
  * @brief 通过定时器中断读取温度。定时器回调函数执行的内容。
  *
  */
 void LM75A_TimerReadTemperature(void)
 {
-	if ((Temp = LM75GetTempReg()) != EVL_ER)
+	uint8_t actualTemp = getActualTemp();
+	if (actualTemp != 1) // Check if the temperature reading is valid
 	{
-		LM75GetTempValue(Temp);
+		// Update the buffer with the new temperature reading
+		tempSum -= tempBuffer[bufferIndex];
+		tempBuffer[bufferIndex] = actualTemp;
+		tempSum += tempBuffer[bufferIndex];
+
+		// Move to the next index in the buffer
+		bufferIndex = (bufferIndex + 1) % BUFFER_SIZE;
+
+		// Calculate the moving average
+		uint8_t averageTemp = tempSum / BUFFER_SIZE;
+
+		// Use the average temperature as needed
+		printf("Average Temperature: %d`C\n", averageTemp);
 	}
 }
 
 /*******************************************************************************
-* Function Name  : getActualTemp
-* Description    : 接口函数 - 获取实际温度(整数)
-* Input          : None
-* Output         : None
-* Return         : OK - actualTemp
-*				   Error - 1
-* Attention      : None
-*******************************************************************************/
-uint8_t getActualTemp() {
+ * Function Name  : getActualTemp
+ * Description    : 接口函数 - 获取实际温度(整数)
+ * Input          : None
+ * Output         : None
+ * Return         : OK - actualTemp
+ *				   Error - 1
+ * Attention      : None
+ *******************************************************************************/
+uint8_t getActualTemp()
+{
 	uint16_t actualTemp = LM75GetTempReg();
-	if (actualTemp == 1) {
+	if (actualTemp == 1)
+	{
 		return 1;
 	}
 
-	if (actualTemp & (0x01 << 16)) {
+	if (actualTemp & (0x01 << 16))
+	{
 		return ((!actualTemp) + 1) >> 3;
-	} else {
+	}
+	else
+	{
 		return actualTemp >> 3;
 	}
 }
-
