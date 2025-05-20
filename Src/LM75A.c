@@ -84,3 +84,26 @@ void LM75A_TimerReadTemperature(void)
 		LM75GetTempValue(Temp);
 	}
 }
+
+/*******************************************************************************
+* Function Name  : getActualTemp
+* Description    : 接口函数 - 获取实际温度(整数)
+* Input          : None
+* Output         : None
+* Return         : OK - actualTemp
+*				   Error - 1
+* Attention      : None
+*******************************************************************************/
+uint8_t getActualTemp() {
+	uint16_t actualTemp = LM75GetTempReg();
+	if (actualTemp == 1) {
+		return 1;
+	}
+
+	if (actualTemp & (0x01 << 16)) {
+		return ((!actualTemp) + 1) >> 3;
+	} else {
+		return actualTemp >> 3;
+	}
+}
+
