@@ -1,4 +1,4 @@
-rcac\zlg7290.o: ..\..\9_ZLG7290\Src\zlg7290.c
+rcac\zlg7290.o: ..\Src\zlg7290.c
 rcac\zlg7290.o: ../Inc/zlg7290.h
 rcac\zlg7290.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 rcac\zlg7290.o: ../Inc/stm32f4xx_hal_conf.h

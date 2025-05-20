@@ -133,11 +133,11 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4107</DriverSelection>
+            <DriverSelection>4100</DriverSelection>
           </Flash1>
-          <bUseTDR>1</bUseTDR>
+          <bUseTDR>0</bUseTDR>
           <Flash2>STLink\ST-LINKIII-KEIL_SWO.dll</Flash2>
-          <Flash3></Flash3>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -413,6 +413,26 @@
               <FileName>LM75A.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\LM75A.c</FilePath>
+            </File>
+            <File>
+              <FileName>Dc_motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\Dc_motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>RemoteInfrared.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\RemoteInfrared.c</FilePath>
+            </File>
+            <File>
+              <FileName>tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\tim.c</FilePath>
+            </File>
+            <File>
+              <FileName>zlg7290.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\zlg7290.c</FilePath>
             </File>
           </Files>
         </Group>

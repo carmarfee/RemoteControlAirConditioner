@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/lenovo/Desktop/嵌入式系统/综合设计实验/Remote_Control_Air_Conditioner/Src",
-      "program": "c:/Users/lenovo/Desktop/嵌入式系统/综合设计实验/Remote_Control_Air_Conditioner/Src/build/Debug/outDebug",
+      "cwd": "c:/Users/lenovo/Desktop/嵌入式系统/综合设计实验/Remote_Control_Air_Conditioner",
+      "program": "c:/Users/lenovo/Desktop/嵌入式系统/综合设计实验/Remote_Control_Air_Conditioner/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

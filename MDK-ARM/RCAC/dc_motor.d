@@ -1,5 +1,5 @@
-rcac\dc_motor.o: ..\..\3_DC_Motor\3_DC_Motor\Src\Dc_motor.c
-rcac\dc_motor.o: ..\..\3_DC_Motor\3_DC_Motor\Src\Dc_motor.h
+rcac\dc_motor.o: ..\Src\Dc_motor.c
+rcac\dc_motor.o: ../Inc/Dc_motor.h
 rcac\dc_motor.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 rcac\dc_motor.o: ../Inc/stm32f4xx_hal_conf.h
 rcac\dc_motor.o: ../Inc/mxconstants.h

@@ -38,6 +38,8 @@
 #include "LM75A.h"
 #include "usart.h"
 #include "zlg7290.h"
+#include "RemoteInfrared.h"
+#include "tim.h"
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -59,7 +61,7 @@ void Error_Handler(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-uint16_t Temp;
+
 /* USER CODE END 0 */
 
 int main(void)
@@ -76,33 +78,23 @@ int main(void)
 
   /* Configure the system clock */
   SystemClock_Config();
-
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_USART1_UART_Init();
-
   /* USER CODE BEGIN 2 */
-  LM75SetMode(CONF_ADDR, NORMOR_MODE);
-  printf("\n\r======= 远程遥控空调系统 =======\n\r");
-  printf("系统已初始化，当前状态：关闭\n\r");
-  printf("请使用遥控器打开系统\n\r");
+  LM75SetMode(CONF_ADDR, NORMOR_MODE); // set LM75A to normal mode
+  HAL_TIM_Base_Start_IT(&htim3); // start timer3
+  printf("\n\r======= RemoteControlAirConditioner =======\n\r");
+  printf("\n\rWelcome to RCAC!!!\n\r");
+  printf("\n\rYou should press the power key to start the system.\n\r");
   /* USER CODE END 2 */
-
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  // while (1)
-  // {
-  //   if ((Temp = LM75GetTempReg()) != EVL_ER)
-  //   {
-  //     LM75GetTempValue(Temp);
-  //   }
-  //   HAL_Delay(1000);
-  //   /* USER CODE END WHILE */
-
-  //   /* USER CODE BEGIN 3 */
-  // }
-  /* USER CODE END 3 */
+  while (1)
+  {
+    Remote_Infrared_KeyDeCode(); // main loop to decode infrared key and excute.
+  }
 }
 
 /** System Clock Configuration
@@ -114,8 +106,9 @@ void SystemClock_Config(void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
 
   __HAL_RCC_PWR_CLK_ENABLE();
+
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-  // 由于存在红外遥感等敏感组件，使用外部高速晶振源
+
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;

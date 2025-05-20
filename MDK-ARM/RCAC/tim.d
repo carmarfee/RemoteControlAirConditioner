@@ -1,4 +1,4 @@
-rcac\tim.o: ..\..\3_DC_Motor\3_DC_Motor\Src\tim.c
+rcac\tim.o: ..\Src\tim.c
 rcac\tim.o: ../Inc/tim.h
 rcac\tim.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 rcac\tim.o: ../Inc/stm32f4xx_hal_conf.h

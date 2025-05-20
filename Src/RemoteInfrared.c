@@ -1,32 +1,24 @@
 #include "RemoteInfrared.h"
 
-#define REPEAT_KEY 0xEE
+#define REPEAT_KEY 0xEE //重复按键特殊码
 
-extern __IO uint32_t GlobalTimingDelay100us;
-extern __IO uint32_t GlobalTimingDelay100usTx;
+extern __IO uint32_t GlobalTimingDelay100us;//在解码过程中，用于检测信号的时间间隔。
+extern __IO uint32_t GlobalTimingDelay100usTx; //在发送数据时，用于延时的时间间隔。
 
-__IO uint32_t FlagGotKey = 0;
+__IO uint32_t FlagGotKey = 0; //标志位，表示是否接收到按键码
 
-__IO Remote_Infrared_data_union RemoteInfrareddata;
+__IO Remote_Infrared_data_union RemoteInfrareddata; //定义一个联合体，用于存储接收到的红外遥控器按键码数据
 
-/************************************************************************
-//�����������
--------------------------Э��--------------------------
-��ʼ����9ms,������һ��4.5ms�ĸ�����,֪ͨ������ʼ����������
-�����Ƿ���4��8λ��������,��һ������ң��ʶ����(REMOTE_ID),��һ��Ϊ
-����(0),�ڶ���Ϊ����(255),�������������Ǽ�ֵ,��һ��Ϊ����
-�ڶ���Ϊ����.�������40ms,ң���ٷ���һ��9ms��,2ms�ߵ�����,
-��ʾ�����Ĵ���,����һ����֤��ֻ������һ��,������ֶ��,���
-����Ϊ�ǳ������¸ü�.
 
-*����: Remote_Infrared_KEY_ISR(INT11_vect )
-*����: INT0�жϷ������
-*����: ��
-*����: ��
-*************************************************************************/
-// ���������������Ϊ5ms
-const uint32_t TIME_DELAY_6MS = 60;
-const uint32_t TIME_DELAY_10MS = 100;
+const uint32_t TIME_DELAY_6MS = 60; // 6ms
+const uint32_t TIME_DELAY_10MS = 100; // 10ms
+
+/**
+ * @brief 是一个中断服务程序，用于解码红外遥控器的按键信号，并将解码后的按键码存储到 RemoteInfrareddata 中。通俗来说就是将红外信号转换为按键码。
+ *
+ *
+ * @param 无参数输入
+ */
 void Remote_Infrared_KEY_ISR(void)
 {
     static __IO uint8_t bBitCounter = 0; // ����֡λ����
@@ -144,12 +136,13 @@ void Remote_Infrared_KEY_ISR(void)
     }
 }
 
-/************************************************************************
- *����: unsigned char Remote_Infrared_KeyDeCode(unsigned char bKeyCode)
- *����: PS2���̽�������
- *����: bKeyCode ������
- *����: ������ASIIC��
- ************************************************************************/
+/**
+ * @brief 将 RemoteInfrareddata 中存储的按键码解析成对应的 ASCII 字符或其他表示形式。通俗来说就是按键码编码为ASCII码,并输出调试信息
+ *
+ *
+ *@param 无参数输入
+ *@ return 
+ */
 uint8_t Remote_Infrared_KeyDeCode(void)
 {
     //	uint8_t Key = 0xFF;
@@ -166,7 +159,7 @@ uint8_t Remote_Infrared_KeyDeCode(void)
                 printf("ERROR  ");
                 break;
             case 0x78:
-                printf("ɾ��   ");
+                printf("删除   ");
                 break;
             case 0x38:
                 printf("HTML5/FLASH    ");

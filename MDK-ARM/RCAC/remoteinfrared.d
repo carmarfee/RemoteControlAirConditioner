@@ -1,4 +1,4 @@
-rcac\remoteinfrared.o: ..\..\11_IR_Receive_Big_Remote_control\Src\RemoteInfrared.c
+rcac\remoteinfrared.o: ..\Src\RemoteInfrared.c
 rcac\remoteinfrared.o: ../Inc/RemoteInfrared.h
 rcac\remoteinfrared.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 rcac\remoteinfrared.o: ../Inc/stm32f4xx_hal_conf.h
