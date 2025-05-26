@@ -4,7 +4,7 @@
  * Description        : Main program body
  ******************************************************************************
  *
- * COPYRIGHT(c) 2016 STMicroelectronics
+ * COPYRIGHT(c) 2025 STMicroelectronics
  *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -32,14 +32,16 @@
  */
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
-#include "Dc_motor.h"
-#include "gpio.h"
 #include "i2c.h"
-#include "LM75A.h"
+#include "tim.h"
 #include "usart.h"
+#include "gpio.h"
+#include "LM75A.h"
+#include "led.h"
 #include "zlg7290.h"
 #include "RemoteInfrared.h"
-#include "tim.h"
+#include "DC_motor.h"
+
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -51,6 +53,8 @@
 __IO uint32_t GlobalTimingDelay100us;
 uint8_t actualTemp = 1;
 uint8_t targetTemp = 1;
+/* 在内存中定义一块缓冲区用于保存8个数码管状态，每次更新数码管均使用这片缓冲区中的数据 */
+uint8_t _LED_Buffer[8] = {0xfc, 0xfc, 0xfc, 0xfc, 0xfc, 0xfc, 0xfc, 0xfc};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -63,14 +67,19 @@ void Error_Handler(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-
 /* USER CODE END 0 */
 
 int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+  /******************************************************************************
+   *
+   *
+   *
+   *
+   *
+   ******************************************************************************/
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -80,23 +89,32 @@ int main(void)
 
   /* Configure the system clock */
   SystemClock_Config();
+
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_USART1_UART_Init();
+  MX_TIM3_Init();
+
   /* USER CODE BEGIN 2 */
   LM75SetMode(CONF_ADDR, NORMOR_MODE); // set LM75A to normal mode
   HAL_TIM_Base_Start_IT(&htim3);       // start timer3
   printf("\n\r======= RemoteControlAirConditioner =======\n\r");
   printf("\n\rWelcome to RCAC!!!\n\r");
   printf("\n\rYou should press the power key to start the system.\n\r");
+  I2C_ZLG7290_Write(&hi2c1, 0x70, 0x10, _LED_Buffer, 8);
   /* USER CODE END 2 */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
     Remote_Infrared_KeyDeCode(); // main loop to decode infrared key and excute.
   }
+  /* USER CODE END 3 */
 }
 
 /** System Clock Configuration
@@ -150,7 +168,6 @@ int fputc(int ch, FILE *f)
   HAL_UART_Transmit(&huart1, tmp, 1, 10);
   return ch;
 }
-/* USER CODE END 4 */
 
 void HAL_SYSTICK_Callback(void)
 {
@@ -159,6 +176,8 @@ void HAL_SYSTICK_Callback(void)
     GlobalTimingDelay100us--;
   }
 }
+
+/* USER CODE END 4 */
 
 /**
  * @brief  This function is executed in case of error occurrence.

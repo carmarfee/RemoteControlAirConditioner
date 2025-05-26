@@ -5,7 +5,7 @@
  *                      of the TIM instances.
  ******************************************************************************
  *
- * COPYRIGHT(c) 2016 STMicroelectronics
+ * COPYRIGHT(c) 2025 STMicroelectronics
  *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -38,7 +38,8 @@
 #include "led.h"
 
 /* USER CODE BEGIN 0 */
-
+extern uint8_t actualTemp;
+extern uint8_t targetTemp;
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim3;
@@ -49,15 +50,10 @@ void MX_TIM3_Init(void)
   TIM_ClockConfigTypeDef sClockSourceConfig;
   TIM_MasterConfigTypeDef sMasterConfig;
 
-  /* 配置为低速时钟源 */
-  /* 84MHz输入时钟 */
-  /* Prescaler=8399，将时钟频率降至10KHz */
-  /* Period=999, 产生10Hz的中断频率 (100ms一次) */
-
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 8399;
+  htim3.Init.Prescaler = 83;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 999;
+  htim3.Init.Period = 20000;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
   {
@@ -104,7 +100,6 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef *tim_baseHandle)
   if (tim_baseHandle->Instance == TIM3)
   {
     /* USER CODE BEGIN TIM3_MspDeInit 0 */
-
     /* USER CODE END TIM3_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_TIM3_CLK_DISABLE();
@@ -118,9 +113,6 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef *tim_baseHandle)
 }
 
 /* USER CODE BEGIN 1 */
-uint32_t DC_Motor_Data = 0;
-static uint8_t counter = 0;
-extern uint8_t actualTemp;
 static uint16_t counter = 0;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
@@ -128,15 +120,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim->Instance == TIM3)
   {
     counter++;
-    if (counter % 40 == 0) {
+    if (counter % 40 == 0)
+    {
       HAL_GPIO_TogglePin(GPIOH, GPIO_PIN_15);
-      DC_Motor_Data = DC_Motor_Count / 4; // ����Ȧ��
-      DC_Motor_Count = 0;                 // ��ֵΪ0�����¿�ʼ������ֵ
     }
-    if (counter % 400 == 0) {
-      actualTemp = LM75A_TimerReadTemperature();       // 100ms
+    if (counter % 400 == 0)
+    {
+      actualTemp = LM75A_TimerReadTemperature(); // 100ms
     }
-    if (counter % 4000 == 0) {
+    printf("Actual Temp: %d\n", actualTemp);
+    if (actualTemp != 1)
+    {
       updateLED_A(actualTemp);
       counter = 0;
     }

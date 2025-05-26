@@ -100,6 +100,7 @@ uint8_t LM75A_TimerReadTemperature(void)
 		
 		return actualTemp;
 	}
+	return 1;
 }
 
 /*******************************************************************************

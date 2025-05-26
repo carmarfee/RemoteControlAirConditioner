@@ -1,5 +1,4 @@
 #include "RemoteInfrared.h"
-#include <stdbool.h>
 
 #define REPEAT_KEY 0xEE // 重复按键特殊码
 
@@ -145,81 +144,6 @@ void Remote_Infrared_KEY_ISR(void)
     }
 }
 
-//----------------------扩展功能部分---------------------------
-typedef struct
-{
-    bool powerOn;    // 空调电源状态
-    int temperature; // 设定温度(16-30°C)
-} ACSystemState;
-
-// 初始化空调系统状态
-ACSystemState acState = {
-    .powerOn = false,
-    .temperature = 25 // 默认温度25°C
-};
-
-// 定义函数指针类型
-typedef void (*KeyHandlerFunction)(void);
-
-// 按键处理函数
-void handlePower(void)
-{
-    acState.powerOn = !acState.powerOn;
-    printf("\n\r power: %s", acState.powerOn ? "on" : "down");
-    // 这里添加实际控制空调电源的代码
-}
-
-void handleTempUp(void)
-{
-    if (!acState.powerOn)
-    {
-        printf("\n\r 空调未开启，无法调节温度");
-        return;
-    }
-
-    if (acState.temperature < 30)
-    {
-        acState.temperature += 1;
-    }
-    printf("\n\r 温度设置: %d°C", acState.temperature);
-    // 这里添加实际控制温度的代码
-}
-
-void handleTempDown(void)
-{
-    if (!acState.powerOn)
-    {
-        printf("\n\r 空调未开启，无法调节温度");
-        return;
-    }
-
-    if (acState.temperature > 16)
-    {
-        acState.temperature -= 1;
-    }
-    printf("\n\r 温度设置: %d°C", acState.temperature);
-    // 这里添加实际控制温度的代码
-}
-
-// 定义按键映射结构体
-typedef struct
-{
-    uint8_t keyCode;            
-    KeyHandlerFunction handler; 
-    const char *description;    
-} KeyMapping;
-
-// 基本按键映射表
-KeyMapping basicKeyMappings[] = {
-    {0x78, handlePower, "power toggle"},
-    {0x08, handleTempUp, "temp+"},  
-    {0x88, handleTempDown, "temp-"} 
-};
-
-#define BASIC_KEY_MAPPING_COUNT (sizeof(basicKeyMappings) / sizeof(KeyMapping))
-
-//-----------------------------------------------------------
-
 /************************************************************************
  *名称: unsigned char Remote_Infrared_KeyDeCode(unsigned char bKeyCode)
  *功能: PS2键盘解码程序��
@@ -236,52 +160,51 @@ uint8_t Remote_Infrared_KeyDeCode(void)
         if ((RemoteInfrareddata.RemoteInfraredDataStruct.bID == (uint8_t)~RemoteInfrareddata.RemoteInfraredDataStruct.bIDNot) && (RemoteInfrareddata.RemoteInfraredDataStruct.bKeyCode == (uint8_t)~RemoteInfrareddata.RemoteInfraredDataStruct.bKeyCodeNot))
         {
             printf("\n\r IR Receive KeyCode = 0x%02X, ", RemoteInfrareddata.RemoteInfraredDataStruct.bKeyCode);
-            
-            // switch (RemoteInfrareddata.RemoteInfraredDataStruct.bKeyCode)
-            // {
-            // case 0:
-            //     printf("ERROR  ");
-            //     break;
-            // case 0x78:
-            //     printf("删除   ");
-            //     break;
-            // case 0x38:
-            //     printf("HTML5/FLASH    ");
-            //     break;
+            switch (RemoteInfrareddata.RemoteInfraredDataStruct.bKeyCode)
+            {
+            case 0:
+                printf("ERROR  ");
+                break;
+            case 0x78:
+                printf("删除   ");
+                break;
+            case 0x38:
+                printf("HTML5/FLASH    ");
+                break;
 
-            // case 0xB8:
-            //     printf("0      ");
-            //     break;
-            // case 0x08:
-            //     printf("1      ");
-            //     break;
-            // case 0x88:
-            //     printf("2      ");
-            //     break;
-            // case 0x48:
-            //     printf("3      ");
-            //     break;
-            // case 0xC8:
-            //     printf("4      ");
-            //     break;
-            // case 0x28:
-            //     printf("5      ");
-            //     break;
-            // case 0xA8:
-            //     printf("6      ");
-            //     break;
-            // case 0xE8:
-            //     printf("7      ");
-            //     break;
-            // case 0x18:
-            //     printf("8      ");
-            //     break;
-            // case 0x98:
-            //     printf("9      ");
-            //     break;
-            // default:
-            //     printf("Unknown key!");
-            // }
+            case 0xB8:
+                printf("0      ");
+                break;
+            case 0x08:
+                printf("1      ");
+                break;
+            case 0x88:
+                printf("2      ");
+                break;
+            case 0x48:
+                printf("3      ");
+                break;
+            case 0xC8:
+                printf("4      ");
+                break;
+            case 0x28:
+                printf("5      ");
+                break;
+            case 0xA8:
+                printf("6      ");
+                break;
+            case 0xE8:
+                printf("7      ");
+                break;
+            case 0x18:
+                printf("8      ");
+                break;
+            case 0x98:
+                printf("9      ");
+                break;
+            default:
+                printf("Unknown key!");
+            }
         }
         else
         {
