@@ -36,7 +36,6 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "beep.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -48,7 +47,7 @@
 /* Private variables ---------------------------------------------------------*/
 uint8_t actualTemp = 1;
 uint8_t targetTemp = 26;
-uint8_t zlg7290_readBuffer[1] = {0};
+uint8_t zlg7290_readBuffer = 0;
 uint8_t zlg7290_canRead = 0;
 
 /* USER CODE END PV */
@@ -107,7 +106,8 @@ int main(void)
   {
     if (zlg7290_canRead == 1) {
         zlg7290_canRead = 0;
-        I2C_ZLG7290_Read(&hi2c1,0x71,0x01,zlg7290_readBuffer,1);
+        I2C_ZLG7290_Read(&hi2c1,0x71,0x01,&zlg7290_readBuffer,1);
+        beepOnce(200);
         switch (zlg7290_readBuffer) {
             case 0x19:  //A
                 if (targetTemp < 30)
@@ -120,6 +120,7 @@ int main(void)
             default:
                 break;
         }
+        zlg7290_readBuffer = 0;
     }
   /* USER CODE END WHILE */
 
@@ -183,10 +184,9 @@ int fputc(int ch, FILE *f)
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-    /* 接收到EXTI13时，读取ZLG7290按键�? */
+    /* 接收到EXTI13时，读取ZLG7290按键�?? */
     if (GPIO_Pin == GPIO_PIN_13) {
         zlg7290_canRead = 1;
-        beepOnce(200);
     }
 }
 
