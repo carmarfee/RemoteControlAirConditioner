@@ -17,6 +17,8 @@ const uint8_t seg7code[10] = {0xFC, 0x0C, 0xDA, 0xF2, 0x66, 0xB6, 0xBE, 0xE0, 0x
 /* 在内存中定义一块缓冲区用于保存8个数码管状态，每次更新数码管均使用这片缓冲区中的数据 */
 uint8_t LED_Buffer[8] = {0};
 
+extern uint8_t targetTemp;
+
 /* 声明库函数 */
 static uint8_t setLEDBuffer(uint8_t index, uint8_t value);
 static void updateLED();
@@ -33,7 +35,7 @@ void initLED(void)
 {
     for (int i = 0; i <= 7; i++)
         setLEDBuffer(i, 0);
-    updateLED();
+    updateLED_T(targetTemp);
 }
 
 /*******************************************************************************

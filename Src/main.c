@@ -36,6 +36,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "led.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -45,10 +46,10 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-__IO uint32_t GlobalTimingDelay100us;
 uint8_t actualTemp = 1;
-uint8_t targetTemp = 1;
-uint8_t zlg7290_ReadBuffer = 0;
+uint8_t targetTemp = 26;
+uint8_t zlg7290_readBuffer = 0;
+uint8_t zlg7290_canRead = 0;
 
 /* USER CODE END PV */
 
@@ -104,10 +105,25 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    if (zlg7290_canRead == 1) {
+        zlg7290_canRead = 0;
+        I2C_ZLG7290_Read(&hi2c1,0x71,0x01,&zlg7290_readBuffer,1);
+        switch (zlg7290_readBuffer) {
+            case 0x19:  //A
+                if (targetTemp < 30)
+                    updateLED_T(++targetTemp);
+                break;
+            case 0x11:  //B
+                if (targetTemp > 16)
+                    updateLED_T(--targetTemp);
+                break;
+            default:
+                break;
+        }
+    }
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-    Remote_Infrared_KeyDeCode(); // main loop to decode infrared key and excute.
   }
   /* USER CODE END 3 */
 
@@ -174,14 +190,9 @@ void HAL_SYSTICK_Callback(void)
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-    /* 接收到EXTI15时，读取红外遥控按键值 */
-    if (GPIO_Pin == GPIO_PIN_15) {
-        Remote_Infrared_KEY_ISR();
-    }
-
     /* 接收到EXTI13时，读取ZLG7290按键值 */
     if (GPIO_Pin == GPIO_PIN_13) {
-
+        zlg7290_canRead = 1;
     }
 }
 
