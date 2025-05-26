@@ -36,9 +36,9 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "RemoteInfrared.h"
 #include "LM75A.h"
 #include "led.h"
+#include "beep.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -48,17 +48,16 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-__IO uint32_t GlobalTimingDelay100us;
 uint8_t actualTemp = 1;
-uint8_t targetTemp = 1;
-uint8_t zlg7290_ReadBuffer = 0;
+uint8_t targetTemp = 26;
+uint8_t zlg7290_readBuffer = 0;
+uint8_t zlg7290_canRead = 0;
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void Error_Handler(void);
-void Feedback(int time);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
@@ -102,15 +101,32 @@ int main(void)
   printf("\n\rWelcome to RCAC!!!\n\r");
   printf("\n\rYou should press the power key to start the system.\n\r");
   /* USER CODE END 2 */
-  GlobalTimingDelay100us = 0; // initialize the global timing delay variable
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    if (zlg7290_canRead == 1)
+    {
+      zlg7290_canRead = 0;
+      I2C_ZLG7290_Read(&hi2c1, 0x71, 0x01, &zlg7290_readBuffer, 1);
+      printf("zlg7290_readBuffer = 0x%02X\n\r", zlg7290_readBuffer);
+      switch (zlg7290_readBuffer)
+      {
+      case 0x19: // A
+        if (targetTemp < 30)
+          updateLED_T(++targetTemp);
+        break;
+      case 0x11: // B
+        if (targetTemp > 16)
+          updateLED_T(--targetTemp);
+        break;
+      default:
+        break;
+      }
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    Remote_Infrared_KeyDeCode(); // main loop to decode infrared key and excute.
   }
   /* USER CODE END 3 */
 }
@@ -167,38 +183,15 @@ int fputc(int ch, FILE *f)
   return ch;
 }
 
-void HAL_SYSTICK_Callback(void)
-{
-  if (GlobalTimingDelay100us != 0)
-  {
-    GlobalTimingDelay100us--;
-  }
-}
-
-void Feedback(int time)
-{
-  for (int i = 0; i < time; i++)
-  {
-    /* code */
-    HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_SET);
-    HAL_Delay(10);
-    HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_RESET);
-    HAL_Delay(10);
-  }
-}
-
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-  /* 接收到EXTI15时，读取红外遥控按键值 */
-  if (GPIO_Pin == GPIO_PIN_15)
-  {
-    Remote_Infrared_KEY_ISR();
-  }
+  /* 接收到EXTI13时，读取ZLG7290按键�? */
 
-  /* 接收到EXTI13时，读取ZLG7290按键值 */
-  if (GPIO_Pin == GPIO_PIN_13)
-  {
-  }
+  // if (GPIO_Pin == GPIO_PIN_13)
+  // {
+  zlg7290_canRead = 1;
+  beepOnce(200);
+  // }
 }
 
 /* USER CODE END 4 */

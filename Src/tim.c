@@ -120,10 +120,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim->Instance == TIM3)
   {
     counter++;
-    if (counter % 40 == 0)
+    if (counter % 400 == 0)
     {
       HAL_GPIO_TogglePin(GPIOH, GPIO_PIN_15);
-      actualTemp = LM75A_TimerReadTemperature(); // 100ms
+      actualTemp = LM75A_TimerReadTemperature();
       if (actualTemp != 1)
       {
         updateLED_A(actualTemp);
