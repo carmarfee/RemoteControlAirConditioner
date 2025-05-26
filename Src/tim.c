@@ -138,6 +138,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
     if (counter % 4000 == 0) {
       updateLED_A(actualTemp);
+      counter = 0;
     }
   }
 }
