@@ -48,7 +48,7 @@
 /* Private variables ---------------------------------------------------------*/
 uint8_t actualTemp = 1;
 uint8_t targetTemp = 26;
-uint8_t zlg7290_readBuffer = 0;
+uint8_t zlg7290_readBuffer[1] = {0};
 uint8_t zlg7290_canRead = 0;
 
 /* USER CODE END PV */
@@ -180,13 +180,6 @@ int fputc(int ch, FILE *f)
   tmp[0] = (uint8_t)ch;
   HAL_UART_Transmit(&huart1, tmp, 1, 10);
   return ch;
-}
-
-void HAL_SYSTICK_Callback(void)
-{
-  if (GlobalTimingDelay100us != 0) {
-    GlobalTimingDelay100us--;
-  }
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {

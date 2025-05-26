@@ -1,5 +1,5 @@
-#ifndef __led_H
-#define __led_H
+#ifndef __beep_H
+#define __beep_H
 
 void beepOnce(uint32_t delay);
 

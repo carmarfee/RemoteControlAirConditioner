@@ -22,6 +22,7 @@ extern uint8_t targetTemp;
 /* 声明库函数 */
 static uint8_t setLEDBuffer(uint8_t index, uint8_t value);
 static void updateLED();
+uint8_t updateLED_T(uint8_t target);
 
 /*******************************************************************************
  * Function Name  : initLED
