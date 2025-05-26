@@ -107,7 +107,7 @@ int main(void)
   {
     if (zlg7290_canRead == 1) {
         zlg7290_canRead = 0;
-        I2C_ZLG7290_Read(&hi2c1,0x71,0x01,&zlg7290_readBuffer,1);
+        I2C_ZLG7290_Read(&hi2c1,0x71,0x01,zlg7290_readBuffer,1);
         switch (zlg7290_readBuffer) {
             case 0x19:  //A
                 if (targetTemp < 30)
