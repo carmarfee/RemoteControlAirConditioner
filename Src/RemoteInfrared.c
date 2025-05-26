@@ -10,32 +10,32 @@ __IO uint32_t FlagGotKey = 0;
 __IO Remote_Infrared_data_union RemoteInfrareddata;
 
 /************************************************************************
-//�����������
--------------------------Э��--------------------------
-��ʼ����9ms,������һ��4.5ms�ĸ�����,֪ͨ������ʼ����������
-�����Ƿ���4��8λ��������,��һ������ң��ʶ����(REMOTE_ID),��һ��Ϊ
-����(0),�ڶ���Ϊ����(255),�������������Ǽ�ֵ,��һ��Ϊ����
-�ڶ���Ϊ����.�������40ms,ң���ٷ���һ��9ms��,2ms�ߵ�����,
-��ʾ�����Ĵ���,����һ����֤��ֻ������һ��,������ֶ��,���
-����Ϊ�ǳ������¸ü�.
+//处理红外接收  
+-------------------------协议--------------------------
+开始拉低9ms,接着是一个4.5ms的高脉冲,通知器件开始传送数据了
+接着是发送4个8位二进制码,第一二个是遥控识别码(REMOTE_ID),第一个为
+正码(0),第二个为反码(255),接着两个数据是键值,第一个为正码
+第二个为反码.发送完后40ms,遥控再发送一个9ms低,2ms高的脉冲,
+表示按键的次数,出现一次则证明只按下了一次,如果出现多次,则可
+以认为是持续按下该键.
 
-*����: Remote_Infrared_KEY_ISR(INT11_vect )
-*����: INT0�жϷ������
-*����: ��
-*����: ��
-*************************************************************************/
-// ���������������Ϊ5ms
+*名称: Remote_Infrared_KEY_ISR(INT11_vect )													 
+*功能: INT0中断服务程序		       									
+*参数: 无					          									
+*返回: 无		                           								
+*************************************************************************/	
+// 检测脉冲宽度最长脉宽为5ms
 const uint32_t TIME_DELAY_6MS = 60;
 const uint32_t TIME_DELAY_10MS = 100;
 void Remote_Infrared_KEY_ISR(void)
 {
-    static __IO uint8_t bBitCounter = 0; // ����֡λ����
+    static __IO uint8_t bBitCounter = 0;
     static __IO uint32_t bKeyCode = 0;
     bBitCounter++;
 
-    if (bBitCounter == 1) // ��ʼ����9ms
+    if (bBitCounter == 1)
     {
-        if (Remote_Infrared_DAT_INPUT) // �ߵ�ƽ��Ч
+        if (Remote_Infrared_DAT_INPUT)
         {
             bBitCounter = 0;
         }
@@ -44,7 +44,7 @@ void Remote_Infrared_KEY_ISR(void)
             GlobalTimingDelay100us = TIME_DELAY_10MS;
         }
     }
-    else if (bBitCounter == 2) // 4.5ms�ĸ�����
+    else if (bBitCounter == 2)
     {
         if (Remote_Infrared_DAT_INPUT)
         {
@@ -64,7 +64,7 @@ void Remote_Infrared_KEY_ISR(void)
             bBitCounter = 0;
         }
     }
-    else if (bBitCounter == 3) // 4.5ms�ĸ�����
+    else if (bBitCounter == 3)
     {
         if (Remote_Infrared_DAT_INPUT)
         {
@@ -145,11 +145,11 @@ void Remote_Infrared_KEY_ISR(void)
 }
 
 /************************************************************************
- *����: unsigned char Remote_Infrared_KeyDeCode(unsigned char bKeyCode)
- *����: PS2���̽�������
- *����: bKeyCode ������
- *����: ������ASIIC��
- ************************************************************************/
+*名称: unsigned char Remote_Infrared_KeyDeCode(unsigned char bKeyCode)					 
+*功能: PS2键盘解码程序		       									    
+*参数: bKeyCode 键盘码 							
+*返回: 按键的ASIIC码		                           								
+************************************************************************/
 uint8_t Remote_Infrared_KeyDeCode(void)
 {
     //	uint8_t Key = 0xFF;
@@ -166,7 +166,7 @@ uint8_t Remote_Infrared_KeyDeCode(void)
                 printf("ERROR  ");
                 break;
             case 0x78:
-                printf("ɾ��   ");
+                printf("删除   ");
                 break;
             case 0x38:
                 printf("HTML5/FLASH    ");
