@@ -3,7 +3,7 @@
 #define __led_H
 #include "stm32f4xx_hal.h"
 
-void initLED();
+void initLED(void);
 uint8_t updateLED_T(uint8_t target);
 uint8_t updateLED_A(uint8_t actual);
 

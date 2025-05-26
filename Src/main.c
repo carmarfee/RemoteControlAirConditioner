@@ -53,14 +53,13 @@
 __IO uint32_t GlobalTimingDelay100us;
 uint8_t actualTemp = 1;
 uint8_t targetTemp = 1;
-/* 在内存中定义一块缓冲区用于保存8个数码管状态，每次更新数码管均使用这片缓冲区中的数据 */
-uint8_t _LED_Buffer[8] = {0xfc, 0xfc, 0xfc, 0xfc, 0xfc, 0xfc, 0xfc, 0xfc};
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void Error_Handler(void);
-
+void Led_Init(void);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
@@ -95,6 +94,7 @@ int main(void)
   MX_I2C1_Init();
   MX_USART1_UART_Init();
   MX_TIM3_Init();
+  initLED(); // initialize LED buffer
 
   /* USER CODE BEGIN 2 */
   LM75SetMode(CONF_ADDR, NORMOR_MODE); // set LM75A to normal mode
@@ -102,7 +102,6 @@ int main(void)
   printf("\n\r======= RemoteControlAirConditioner =======\n\r");
   printf("\n\rWelcome to RCAC!!!\n\r");
   printf("\n\rYou should press the power key to start the system.\n\r");
-  I2C_ZLG7290_Write(&hi2c1, 0x70, 0x10, _LED_Buffer, 8);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -152,7 +151,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 10000);
 
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 

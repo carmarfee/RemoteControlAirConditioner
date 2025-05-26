@@ -123,16 +123,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     if (counter % 40 == 0)
     {
       HAL_GPIO_TogglePin(GPIOH, GPIO_PIN_15);
-    }
-    if (counter % 400 == 0)
-    {
       actualTemp = LM75A_TimerReadTemperature(); // 100ms
-    }
-    printf("Actual Temp: %d\n", actualTemp);
-    if (actualTemp != 1)
-    {
-      updateLED_A(actualTemp);
-      counter = 0;
+      if (actualTemp != 1)
+      {
+        updateLED_A(actualTemp);
+        counter = 0;
+      }
     }
   }
 }

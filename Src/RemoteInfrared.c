@@ -1,41 +1,41 @@
 #include "RemoteInfrared.h"
 
-#define REPEAT_KEY 0xEE // 重复按键特殊码
+#define REPEAT_KEY 0xEE
 
-extern __IO uint32_t GlobalTimingDelay100us;   // 在解码过程中，用于检测信号的时间间隔。
-extern __IO uint32_t GlobalTimingDelay100usTx; // 在发送数据时，用于延时的时间间隔。
+extern __IO uint32_t GlobalTimingDelay100us;
+extern __IO uint32_t GlobalTimingDelay100usTx;
 
-__IO uint32_t FlagGotKey = 0; // 标志位，表示是否接收到按键码
+__IO uint32_t FlagGotKey = 0;
 
-__IO Remote_Infrared_data_union RemoteInfrareddata; // 定义一个联合体，用于存储接收到的红外遥控器按键码数据
+__IO Remote_Infrared_data_union RemoteInfrareddata;
 
 /************************************************************************
-//处理红外接收
--------------------------协议--------------------------
-开始拉低9ms,接着是一个4.5ms的高脉冲,通知器件开始传送数据了
-接着是发送4个8位二进制码,第一二个是遥控识别码(REMOTE_ID),第一个为
-正码(0),第二个为反码(255),接着两个数据是键值,第一个为正码
-第二个为反码.发送完后40ms,遥控再发送一个9ms低,2ms高的脉冲,
-表示按键的次数,出现一次则证明只按下了一次,如果出现多次,则可
-以认为是持续按下该键.
+//�����������
+-------------------------Э��--------------------------
+��ʼ����9ms,������һ��4.5ms�ĸ�����,֪ͨ������ʼ����������
+�����Ƿ���4��8λ��������,��һ������ң��ʶ����(REMOTE_ID),��һ��Ϊ
+����(0),�ڶ���Ϊ����(255),�������������Ǽ�ֵ,��һ��Ϊ����
+�ڶ���Ϊ����.�������40ms,ң���ٷ���һ��9ms��,2ms�ߵ�����,
+��ʾ�����Ĵ���,����һ����֤��ֻ������һ��,������ֶ��,���
+����Ϊ�ǳ������¸ü�.
 
-*名称: Remote_Infrared_KEY_ISR(INT11_vect )
-*功能: INT0中断服务程序
-*参数: 无
-*返回: 无
+*����: Remote_Infrared_KEY_ISR(INT11_vect )
+*����: INT0�жϷ������
+*����: ��
+*����: ��
 *************************************************************************/
-// 检测脉冲宽度最长脉宽为5ms
+// ���������������Ϊ5ms
 const uint32_t TIME_DELAY_6MS = 60;
 const uint32_t TIME_DELAY_10MS = 100;
 void Remote_Infrared_KEY_ISR(void)
 {
-    static __IO uint8_t bBitCounter = 0; // 键盘帧位计数
+    static __IO uint8_t bBitCounter = 0; // ����֡λ����
     static __IO uint32_t bKeyCode = 0;
     bBitCounter++;
 
-    if (bBitCounter == 1) // 开始拉低9ms
+    if (bBitCounter == 1) // ��ʼ����9ms
     {
-        if (Remote_Infrared_DAT_INPUT) // 高电平无效
+        if (Remote_Infrared_DAT_INPUT) // �ߵ�ƽ��Ч
         {
             bBitCounter = 0;
         }
@@ -44,7 +44,7 @@ void Remote_Infrared_KEY_ISR(void)
             GlobalTimingDelay100us = TIME_DELAY_10MS;
         }
     }
-    else if (bBitCounter == 2) // 4.5ms的高脉冲
+    else if (bBitCounter == 2) // 4.5ms�ĸ�����
     {
         if (Remote_Infrared_DAT_INPUT)
         {
@@ -55,7 +55,7 @@ void Remote_Infrared_KEY_ISR(void)
             else
             {
                 bBitCounter = 0;
-                printf(".");
+                printf("tick: %d --", GlobalTimingDelay100us);
             }
         }
 
@@ -64,7 +64,7 @@ void Remote_Infrared_KEY_ISR(void)
             bBitCounter = 0;
         }
     }
-    else if (bBitCounter == 3) // 4.5ms的高脉冲
+    else if (bBitCounter == 3) // 4.5ms�ĸ�����
     {
         if (Remote_Infrared_DAT_INPUT)
         {
@@ -75,7 +75,7 @@ void Remote_Infrared_KEY_ISR(void)
             if ((GlobalTimingDelay100us > 5) && (GlobalTimingDelay100us < 20))
             {
                 GlobalTimingDelay100us = TIME_DELAY_6MS;
-                // printf("引导码");
+                printf("������");
             }
             else if ((GlobalTimingDelay100us > 32) && (GlobalTimingDelay100us < 46))
             {
@@ -92,7 +92,7 @@ void Remote_Infrared_KEY_ISR(void)
             }
         }
     }
-    else if (bBitCounter > 3 && bBitCounter < 68) // 接收8位数据
+    else if (bBitCounter > 3 && bBitCounter < 68) // ����8λ����
     {
 
         if (Remote_Infrared_DAT_INPUT)
@@ -145,16 +145,16 @@ void Remote_Infrared_KEY_ISR(void)
 }
 
 /************************************************************************
- *名称: unsigned char Remote_Infrared_KeyDeCode(unsigned char bKeyCode)
- *功能: PS2键盘解码程序��
- *参数: bKeyCode 键盘码
- *返回: 按键的ASIIC码
+ *����: unsigned char Remote_Infrared_KeyDeCode(unsigned char bKeyCode)
+ *����: PS2���̽�������
+ *����: bKeyCode ������
+ *����: ������ASIIC��
  ************************************************************************/
 uint8_t Remote_Infrared_KeyDeCode(void)
 {
     //	uint8_t Key = 0xFF;
 
-    if (FlagGotKey == 1) // 通码
+    if (FlagGotKey == 1) // ͨ��
     {
         FlagGotKey = 0;
         if ((RemoteInfrareddata.RemoteInfraredDataStruct.bID == (uint8_t)~RemoteInfrareddata.RemoteInfraredDataStruct.bIDNot) && (RemoteInfrareddata.RemoteInfraredDataStruct.bKeyCode == (uint8_t)~RemoteInfrareddata.RemoteInfraredDataStruct.bKeyCodeNot))
@@ -166,7 +166,7 @@ uint8_t Remote_Infrared_KeyDeCode(void)
                 printf("ERROR  ");
                 break;
             case 0x78:
-                printf("删除   ");
+                printf("ɾ��   ");
                 break;
             case 0x38:
                 printf("HTML5/FLASH    ");
