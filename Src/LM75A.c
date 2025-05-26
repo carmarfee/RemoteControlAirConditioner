@@ -74,14 +74,14 @@ double LM75GetTempValue(uint16_t tempreg)
 
 #define BUFFER_SIZE 10 // Define the size of the buffer for moving average
 
-uint16_t tempBuffer[BUFFER_SIZE] = {0};
+uint8_t tempBuffer[BUFFER_SIZE] = {0};
 uint8_t bufferIndex = 0;
-uint32_t tempSum = 0;
+uint16_t tempSum = 0;
 /**
  * @brief 通过定时器中断读取温度。定时器回调函数执行的内容。
  *
  */
-void LM75A_TimerReadTemperature(void)
+uint8_t LM75A_TimerReadTemperature(void)
 {
 	uint8_t actualTemp = getActualTemp();
 	if (actualTemp != 1) // Check if the temperature reading is valid
@@ -94,11 +94,11 @@ void LM75A_TimerReadTemperature(void)
 		// Move to the next index in the buffer
 		bufferIndex = (bufferIndex + 1) % BUFFER_SIZE;
 
-		// Calculate the moving average
-		uint8_t averageTemp = tempSum / BUFFER_SIZE;
-
-		// Use the average temperature as needed
-		printf("Average Temperature: %d`C\n", averageTemp);
+		if (bufferIndex >= 9) {
+			actualTemp = tempSum / BUFFER_SIZE;
+		}
+		
+		return actualTemp;
 	}
 }
 

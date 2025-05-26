@@ -33,7 +33,7 @@ uint16_t LM75GetTempReg(void);
 double LM75GetTempValue(uint16_t tempreg);
 uint8_t getActualTemp();
 
-void LM75A_TimerReadTemperature(void);
+uint8_t LM75A_TimerReadTemperature(void);
 extern volatile uint16_t LM75A_Temperature;
 extern volatile uint8_t LM75A_ReadReady;
 

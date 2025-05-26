@@ -34,6 +34,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "tim.h"
+#include "LM75A.h"
+#include "led.h"
 
 /* USER CODE BEGIN 0 */
 
@@ -117,14 +119,27 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef *tim_baseHandle)
 
 /* USER CODE BEGIN 1 */
 uint32_t DC_Motor_Data = 0;
+static uint8_t counter = 0;
+extern uint8_t actualTemp;
+static uint16_t counter = 0;
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim->Instance == TIM3)
   {
-    HAL_GPIO_TogglePin(GPIOH, GPIO_PIN_15);
-    DC_Motor_Data = DC_Motor_Count / 4; // ����Ȧ��
-    DC_Motor_Count = 0;                 // ��ֵΪ0�����¿�ʼ������ֵ
-    LM75A_TimerReadTemperature();       // 100ms
+    counter++;
+    if (counter % 40 == 0) {
+      HAL_GPIO_TogglePin(GPIOH, GPIO_PIN_15);
+      DC_Motor_Data = DC_Motor_Count / 4; // ����Ȧ��
+      DC_Motor_Count = 0;                 // ��ֵΪ0�����¿�ʼ������ֵ
+    }
+    if (counter % 400 == 0) {
+      actualTemp = LM75A_TimerReadTemperature();       // 100ms
+    }
+    if (counter % 4000 == 0) {
+      updateLED_A(actualTemp);
+      counter = 0;
+    }
   }
 }
 /* USER CODE END 1 */

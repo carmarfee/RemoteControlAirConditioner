@@ -49,6 +49,8 @@
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 __IO uint32_t GlobalTimingDelay100us;
+uint8_t actualTemp = 1;
+uint8_t targetTemp = 1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
