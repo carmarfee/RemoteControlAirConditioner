@@ -55,7 +55,7 @@ void Remote_Infrared_KEY_ISR(void)
             else
             {
                 bBitCounter = 0;
-                printf("tick: %d --", GlobalTimingDelay100us);
+								printf(".");
             }
         }
 

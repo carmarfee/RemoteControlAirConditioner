@@ -36,10 +36,8 @@ rcac\main.o: ../Inc/i2c.h
 rcac\main.o: ../Inc/tim.h
 rcac\main.o: ../Inc/usart.h
 rcac\main.o: ../Inc/gpio.h
+rcac\main.o: ../Inc/RemoteInfrared.h
 rcac\main.o: ../Inc/LM75A.h
 rcac\main.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\stdlib.h
 rcac\main.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\string.h
 rcac\main.o: ../Inc/led.h
-rcac\main.o: ../Inc/zlg7290.h
-rcac\main.o: ../Inc/RemoteInfrared.h
-rcac\main.o: ../Inc/DC_motor.h
