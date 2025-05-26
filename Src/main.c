@@ -36,7 +36,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "led.h"
+#include "beep.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -190,9 +190,10 @@ void HAL_SYSTICK_Callback(void)
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-    /* 接收到EXTI13时，读取ZLG7290按键值 */
+    /* 接收到EXTI13时，读取ZLG7290按键�? */
     if (GPIO_Pin == GPIO_PIN_13) {
         zlg7290_canRead = 1;
+        beepOnce(200);
     }
 }
 
