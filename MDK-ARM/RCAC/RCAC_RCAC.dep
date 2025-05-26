@@ -1,5 +1,5 @@
 Dependencies for Project 'RCAC', Target 'RCAC': (DO NOT MODIFY !)
-F (../Src/main.c)(0x682AAF15)(-c --cpu Cortex-M4.fp -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include --C99-IC:\Users\lenovo\Desktop\嵌入式系统\综合设计实验\Remote_Control_Air_Conditioner\MDK-ARM\RTE-ID:\MKD5.21\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include-ID:\MKD5.21\ARM\PACK\Keil\STM32F4xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="521" -D_RTE_ -DSTM32F407xx -DUSE_HAL_DRIVER -DSTM32F407xx-o rcac\main.o --omf_browse rcac\main.crf --depend rcac\main.d)
+F (../Src/main.c)(0x682BF27A)(-c --cpu Cortex-M4.fp -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include --C99-IC:\Users\lenovo\Desktop\嵌入式系统\综合设计实验\Remote_Control_Air_Conditioner\MDK-ARM\RTE-ID:\MKD5.21\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include-ID:\MKD5.21\ARM\PACK\Keil\STM32F4xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="521" -D_RTE_ -DSTM32F407xx -DUSE_HAL_DRIVER -DSTM32F407xx-o rcac\main.o --omf_browse rcac\main.crf --depend rcac\main.d)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x57714E12)
 I (../Inc/stm32f4xx_hal_conf.h)(0x6821F0A0)
 I (../Inc/mxconstants.h)(0x57E6517E)
@@ -36,11 +36,11 @@ I (../Inc/Dc_motor.h)(0x57CFA09D)
 I (../Inc/i2c.h)(0x57E6517D)
 I (../Inc/zlg7290.h)(0x56776F34)
 I (../Inc/gpio.h)(0x682A8C58)
-I (../Inc/LM75A.h)(0x682AADA3)
+I (../Inc/LM75A.h)(0x682BF3C6)
 I (D:\MKD5.21\ARM\ARMCC\include\stdlib.h)(0x574E3E26)
 I (D:\MKD5.21\ARM\ARMCC\include\string.h)(0x574E3E26)
 I (../Inc/usart.h)(0x57E6517D)
-I (../Inc/RemoteInfrared.h)(0x56557A04)
+I (../Inc/RemoteInfrared.h)(0x682BF391)
 I (../Inc/tim.h)(0x682A8C23)
 F (../Src/gpio.c)(0x682A8C78)(-c --cpu Cortex-M4.fp -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include --C99-IC:\Users\lenovo\Desktop\嵌入式系统\综合设计实验\Remote_Control_Air_Conditioner\MDK-ARM\RTE-ID:\MKD5.21\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include-ID:\MKD5.21\ARM\PACK\Keil\STM32F4xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="521" -D_RTE_ -DSTM32F407xx -DUSE_HAL_DRIVER -DSTM32F407xx-o rcac\gpio.o --omf_browse rcac\gpio.crf --depend rcac\gpio.d)
 I (../Inc/gpio.h)(0x682A8C58)
@@ -213,8 +213,8 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h)(0x57714E12)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x57714E12)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x57714E12)
 I (../Inc/gpio.h)(0x682A8C58)
-F (..\Src\LM75A.c)(0x682AAE13)(-c --cpu Cortex-M4.fp -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include --C99-IC:\Users\lenovo\Desktop\嵌入式系统\综合设计实验\Remote_Control_Air_Conditioner\MDK-ARM\RTE-ID:\MKD5.21\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include-ID:\MKD5.21\ARM\PACK\Keil\STM32F4xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="521" -D_RTE_ -DSTM32F407xx -DUSE_HAL_DRIVER -DSTM32F407xx-o rcac\lm75a.o --omf_browse rcac\lm75a.crf --depend rcac\lm75a.d)
-I (../Inc/LM75A.h)(0x682AADA3)
+F (..\Src\LM75A.c)(0x682BFD71)(-c --cpu Cortex-M4.fp -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include --C99-IC:\Users\lenovo\Desktop\嵌入式系统\综合设计实验\Remote_Control_Air_Conditioner\MDK-ARM\RTE-ID:\MKD5.21\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include-ID:\MKD5.21\ARM\PACK\Keil\STM32F4xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="521" -D_RTE_ -DSTM32F407xx -DUSE_HAL_DRIVER -DSTM32F407xx-o rcac\lm75a.o --omf_browse rcac\lm75a.crf --depend rcac\lm75a.d)
+I (../Inc/LM75A.h)(0x682BF3C6)
 I (D:\MKD5.21\ARM\ARMCC\include\stdio.h)(0x574E3E26)
 I (D:\MKD5.21\ARM\ARMCC\include\stdlib.h)(0x574E3E26)
 I (D:\MKD5.21\ARM\ARMCC\include\string.h)(0x574E3E26)
@@ -287,8 +287,8 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x57714E12)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x57714E12)
 I (../Inc/i2c.h)(0x57E6517D)
 I (../Inc/zlg7290.h)(0x56776F34)
-F (..\Src\RemoteInfrared.c)(0x682A9E63)(-c --cpu Cortex-M4.fp -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include --C99-IC:\Users\lenovo\Desktop\嵌入式系统\综合设计实验\Remote_Control_Air_Conditioner\MDK-ARM\RTE-ID:\MKD5.21\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include-ID:\MKD5.21\ARM\PACK\Keil\STM32F4xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="521" -D_RTE_ -DSTM32F407xx -DUSE_HAL_DRIVER -DSTM32F407xx-o rcac\remoteinfrared.o --omf_browse rcac\remoteinfrared.crf --depend rcac\remoteinfrared.d)
-I (../Inc/RemoteInfrared.h)(0x56557A04)
+F (..\Src\RemoteInfrared.c)(0x6833BEC8)(-c --cpu Cortex-M4.fp -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include --C99-IC:\Users\lenovo\Desktop\嵌入式系统\综合设计实验\Remote_Control_Air_Conditioner\MDK-ARM\RTE-ID:\MKD5.21\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include-ID:\MKD5.21\ARM\PACK\Keil\STM32F4xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="521" -D_RTE_ -DSTM32F407xx -DUSE_HAL_DRIVER -DSTM32F407xx-o rcac\remoteinfrared.o --omf_browse rcac\remoteinfrared.crf --depend rcac\remoteinfrared.d)
+I (../Inc/RemoteInfrared.h)(0x682BF391)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x57714E12)
 I (../Inc/stm32f4xx_hal_conf.h)(0x6821F0A0)
 I (../Inc/mxconstants.h)(0x57E6517E)
@@ -321,7 +321,8 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h)(0x57714E12)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h)(0x57714E12)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x57714E12)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x57714E12)
-F (..\Src\tim.c)(0x682AAFAB)(-c --cpu Cortex-M4.fp -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include --C99-IC:\Users\lenovo\Desktop\嵌入式系统\综合设计实验\Remote_Control_Air_Conditioner\MDK-ARM\RTE-ID:\MKD5.21\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include-ID:\MKD5.21\ARM\PACK\Keil\STM32F4xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="521" -D_RTE_ -DSTM32F407xx -DUSE_HAL_DRIVER -DSTM32F407xx-o rcac\tim.o --omf_browse rcac\tim.crf --depend rcac\tim.d)
+I (D:\MKD5.21\ARM\ARMCC\include\stdbool.h)(0x574E3E26)
+F (..\Src\tim.c)(0x682BFDAC)(-c --cpu Cortex-M4.fp -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include --C99-IC:\Users\lenovo\Desktop\嵌入式系统\综合设计实验\Remote_Control_Air_Conditioner\MDK-ARM\RTE-ID:\MKD5.21\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include-ID:\MKD5.21\ARM\PACK\Keil\STM32F4xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="521" -D_RTE_ -DSTM32F407xx -DUSE_HAL_DRIVER -DSTM32F407xx-o rcac\tim.o --omf_browse rcac\tim.crf --depend rcac\tim.d)
 I (../Inc/tim.h)(0x682A8C23)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x57714E12)
 I (../Inc/stm32f4xx_hal_conf.h)(0x6821F0A0)

@@ -33,3 +33,4 @@ rcac\remoteinfrared.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.
 rcac\remoteinfrared.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 rcac\remoteinfrared.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 rcac\remoteinfrared.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+rcac\remoteinfrared.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\stdbool.h

@@ -84,7 +84,7 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   LM75SetMode(CONF_ADDR, NORMOR_MODE); // set LM75A to normal mode
-  HAL_TIM_Base_Start_IT(&htim3); // start timer3
+  HAL_TIM_Base_Start_IT(&htim3);       // start timer3
   printf("\n\r======= RemoteControlAirConditioner =======\n\r");
   printf("\n\rWelcome to RCAC!!!\n\r");
   printf("\n\rYou should press the power key to start the system.\n\r");
