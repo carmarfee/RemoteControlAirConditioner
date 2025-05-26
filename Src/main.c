@@ -117,6 +117,9 @@ int main(void)
                 if (targetTemp > 16)
                     updateLED_T(--targetTemp);
                 break;
+            case 0x01: //D
+                /* 此处写power按钮逻辑 */
+                break;
             default:
                 break;
         }
