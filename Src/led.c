@@ -12,7 +12,7 @@
 #define BUFFER_SIZE_LED (sizeof(LED_Buffer) / sizeof(*LED_Buffer))
 
 /* 索引对应值为数码管编码 */
-const uint8_t seg7code[10] = {0xFC, 0x0C, 0xDA, 0xF2, 0x66, 0xB6, 0xBE, 0xE0, 0xFE, 0xE6};
+const uint8_t seg7code[10] = {0xFC, 0x0C, 0xDA, 0xF2, 0x66, 0xB6, 0xBE, 0xE0, 0xFE, 0xE6, 0x00};
 
 /* 在内存中定义一块缓冲区用于保存8个数码管状态，每次更新数码管均使用这片缓冲区中的数据 */
 uint8_t LED_Buffer[8] = {0};
@@ -187,4 +187,12 @@ static uint8_t setLEDBuffer(uint8_t index, uint8_t value)
 void updateLED()
 {
     I2C_ZLG7290_Write(&hi2c1, 0x70, ZLG_WRITE_ADDRESS_BEGIN, LED_Buffer, BUFFER_SIZE_LED);
+}
+
+void DisplayLED_Off()
+{
+    for (int i = 0; i < 8; i++)
+    {
+        setLEDBuffer(i, 10); // 10对应seg7code中的0x00，表示关闭该位
+    }
 }

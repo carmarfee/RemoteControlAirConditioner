@@ -36,23 +36,29 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+<<<<<<< HEAD
 #include "LM75A.h"
 #include "led.h"
 #include "beep.h"
 #include "zlg7290.h"
+    == == ==
+    =
+>>>>>>> 62f874e7a36a946fc32dba150c764fef24e7742c
 
-/* USER CODE BEGIN Includes */
+        /* USER CODE BEGIN Includes */
 
-/* USER CODE END Includes */
+    /* USER CODE END Includes */
 
-/* Private variables ---------------------------------------------------------*/
+    /* Private variables ---------------------------------------------------------*/
 
-/* USER CODE BEGIN PV */
-/* Private variables ---------------------------------------------------------*/
-uint8_t actualTemp = 1;
+    /* USER CODE BEGIN PV */
+    /* Private variables ---------------------------------------------------------*/
+    uint8_t actualTemp = 1;
 uint8_t targetTemp = 26;
-uint8_t zlg7290_readBuffer[1] = {0};
+uint8_t zlg7290_readBuffer = 0;
 uint8_t zlg7290_canRead = 0;
+
+uint8_t PowerState = 0; // 0: off, 1: on
 
 /* USER CODE END PV */
 
@@ -106,25 +112,54 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    if (zlg7290_canRead == 1)
+    if (PowerState == 0)
     {
-      zlg7290_canRead = 0;
-      I2C_ZLG7290_Read(&hi2c1, 0x71, 0x01, zlg7290_readBuffer, 1);
-      beepOnce(50);
-      switch (zlg7290_readBuffer[0])
+      /* 如果系统处于关闭状态，等待按键操作 */
+      if (zlg7290_canRead == 1)
       {
-      case 0x19: // A
-        if (targetTemp < 30)
-          updateLED_T(++targetTemp);
-        break;
-      case 0x11: // B
-        if (targetTemp > 16)
-          updateLED_T(--targetTemp);
-        break;
-      default:
-        break;
+        zlg7290_canRead = 0;
+        I2C_ZLG7290_Read(&hi2c1, 0x71, 0x01, &zlg7290_readBuffer, 1);
+        beepOnce(200);
+        if (zlg7290_readBuffer == 0x01)
+        {                 // D key pressed
+          PowerState = 1; // 开启系统
+          printf("\n\rSystem powered on.\n\r");
+          updateLED_T(targetTemp); // 更新LED显示
+        }
+        zlg7290_readBuffer = 0;
       }
     }
+    else
+    {
+      /* 系统已开启，读取温度并更新LED显示 */
+      if (zlg7290_canRead == 1)
+      {
+        zlg7290_canRead = 0;
+        I2C_ZLG7290_Read(&hi2c1, 0x71, 0x01, &zlg7290_readBuffer, 1);
+        beepOnce(200);
+        switch (zlg7290_readBuffer)
+        {
+        case 0x19: // A
+          if (targetTemp < 30)
+            updateLED_T(++targetTemp);
+          break;
+        case 0x11: // B
+          if (targetTemp > 16)
+            updateLED_T(--targetTemp);
+          break;
+        case 0x01: // D
+          /* 此处写power按钮逻辑 */
+          PowerState = 0;   // 关闭系统
+          DisplayLED_Off(); // 关闭LED显示
+          printf("\n\rSystem powered off.\n\r");
+          break;
+        default:
+          break;
+        }
+        zlg7290_readBuffer = 0;
+      }
+    }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -186,7 +221,7 @@ int fputc(int ch, FILE *f)
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-  /* 接收到EXTI13时，读取ZLG7290按键�? */
+  /* 接收到EXTI13时，读取ZLG7290按键�?? */
   if (GPIO_Pin == GPIO_PIN_13)
   {
     zlg7290_canRead = 1;
