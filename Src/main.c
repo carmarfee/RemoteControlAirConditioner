@@ -39,6 +39,7 @@
 #include "LM75A.h"
 #include "led.h"
 #include "beep.h"
+#include "zlg7290.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -50,7 +51,7 @@
 /* Private variables ---------------------------------------------------------*/
 uint8_t actualTemp = 1;
 uint8_t targetTemp = 26;
-uint8_t zlg7290_readBuffer = 0;
+uint8_t zlg7290_readBuffer[1] = {0};
 uint8_t zlg7290_canRead = 0;
 
 /* USER CODE END PV */
@@ -108,9 +109,9 @@ int main(void)
     if (zlg7290_canRead == 1)
     {
       zlg7290_canRead = 0;
-      I2C_ZLG7290_Read(&hi2c1, 0x71, 0x01, &zlg7290_readBuffer, 1);
-      printf("zlg7290_readBuffer = 0x%02X\n\r", zlg7290_readBuffer);
-      switch (zlg7290_readBuffer)
+      I2C_ZLG7290_Read(&hi2c1, 0x71, 0x01, zlg7290_readBuffer, 1);
+      beepOnce(50);
+      switch (zlg7290_readBuffer[0])
       {
       case 0x19: // A
         if (targetTemp < 30)
@@ -186,12 +187,10 @@ int fputc(int ch, FILE *f)
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   /* 接收到EXTI13时，读取ZLG7290按键�? */
-
-  // if (GPIO_Pin == GPIO_PIN_13)
-  // {
-  zlg7290_canRead = 1;
-  beepOnce(200);
-  // }
+  if (GPIO_Pin == GPIO_PIN_13)
+  {
+    zlg7290_canRead = 1;
+  }
 }
 
 /* USER CODE END 4 */

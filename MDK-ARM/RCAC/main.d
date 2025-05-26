@@ -41,3 +41,4 @@ rcac\main.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\stdlib.h
 rcac\main.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\string.h
 rcac\main.o: ../Inc/led.h
 rcac\main.o: ../Inc/beep.h
+rcac\main.o: ../Inc/zlg7290.h
