@@ -8,11 +8,13 @@
  * Return         : None
  * Attention      : None
  *******************************************************************************/
-void beepOnce(uint32_t delay) {
-    for (i = 0; i < delay; i++) {
-        HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
-	    HAL_Delay(20);
-	    HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
-        HAL_Delay(20);
-    }
+void beepOnce(uint32_t delay)
+{
+	for (int i = 0; i < delay; i++)
+	{
+		HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_SET);
+		HAL_Delay(20);
+		HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_RESET);
+		HAL_Delay(20);
+	}
 }
