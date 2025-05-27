@@ -34,10 +34,12 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "tim.h"
+#include "zlg7290.h"
 
 /* USER CODE BEGIN 0 */
 extern uint8_t actualTemp;
 extern uint8_t targetTemp;
+extern zlg7290h zlg7290;
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim3;
@@ -124,7 +126,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     {
       HAL_GPIO_TogglePin(GPIOH, GPIO_PIN_15);
       actualTemp = LM75A_TimerReadTemperature();
-      if (actualTemp != 1)
+      if (actualTemp != 1 && zlg7290.state == (ZLG7290State)Normal)
       {
         updateLED_A(actualTemp);
         counter = 0;

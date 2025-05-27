@@ -36,6 +36,9 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "zlg7290.h"
+#include "DC_motor.h"
+#include "LM75A.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -45,10 +48,13 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+#define ZLG7290MaxIdleTicks 60000
+#define BeepDelay 40
+zlg7290h zlg7290;
 uint8_t actualTemp = 1;
 uint8_t targetTemp = 26;
-uint8_t zlg7290_readBuffer = 0;
-uint8_t zlg7290_canRead = 0;
+
+
 
 /* USER CODE END PV */
 
@@ -66,15 +72,12 @@ void Error_Handler(void);
 
 int main(void)
 {
-
   /* USER CODE BEGIN 1 */
-  /******************************************************************************
-   *
-   *
-   *
-   *
-   *
-   ******************************************************************************/
+  zlg7290.readBuffer = 0;
+  zlg7290.canRead = 0;
+  zlg7290.idleTicks = 0;
+  zlg7290.state = (ZLG7290State)Normal;
+  zlg7290.needSwitchState = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -95,35 +98,57 @@ int main(void)
   LM75SetMode(CONF_ADDR, NORMOR_MODE); // set LM75A to normal mode
   initLED(); // initialize LED buffer
   HAL_TIM_Base_Start_IT(&htim3);       // start timer3
-  printf("\n\r======= RemoteControlAirConditioner =======\n\r");
+ /*  printf("\n\r======= RemoteControlAirConditioner =======\n\r");
   printf("\n\rWelcome to RCAC!!!\n\r");
-  printf("\n\rYou should press the power key to start the system.\n\r");
+  printf("\n\rYou should press the power key to start the system.\n\r"); */
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    if (zlg7290_canRead == 1) {
-        zlg7290_canRead = 0;
-        I2C_ZLG7290_Read(&hi2c1,0x71,0x01,&zlg7290_readBuffer,1);
-        beepOnce(200);
-        switch (zlg7290_readBuffer) {
+    if (zlg7290.canRead == 1) {
+        zlg7290.canRead = 0;
+        I2C_ZLG7290_Read(&hi2c1,0x71,0x01,&zlg7290.readBuffer,1);
+        beepOnce(BeepDelay);
+        switch (zlg7290.readBuffer) {
             case 0x19:  //A
+                if (zlg7290.needSwitchState == 0 && zlg7290.state == (ZLG7290State)Sleep)
+                  zlg7290.needSwitchState = 1;
                 if (targetTemp < 30)
                     updateLED_T(++targetTemp);
                 break;
             case 0x11:  //B
+                if (zlg7290.needSwitchState == 0 && zlg7290.state == (ZLG7290State)Sleep)
+                  zlg7290.needSwitchState = 1;
                 if (targetTemp > 16)
                     updateLED_T(--targetTemp);
                 break;
             case 0x01: //D
                 /* 此处写power按钮逻辑 */
+                if (zlg7290.needSwitchState == 0 && zlg7290.state == (ZLG7290State)Normal)
+                  zlg7290.needSwitchState = 1;
                 break;
             default:
+                if (zlg7290.needSwitchState == 0 && zlg7290.state == (ZLG7290State)Sleep)
+                  zlg7290.needSwitchState = 1;
                 break;
         }
-        zlg7290_readBuffer = 0;
+        zlg7290.readBuffer = 0;
+    }
+    if (zlg7290.needSwitchState == 1) {
+      if (zlg7290.state == (ZLG7290State)Normal) {
+        zlg7290.needSwitchState = 0;
+        zlg7290.state = (ZLG7290State)Sleep;
+        updateLED(nullBuffer);
+      } else {
+        zlg7290.needSwitchState = 0;
+        zlg7290.state = (ZLG7290State)Normal;
+        updateLED(LED_Buffer);
+      }
+    }
+    if (actualTemp > targetTemp) {
+
     }
   /* USER CODE END WHILE */
 
@@ -186,10 +211,23 @@ int fputc(int ch, FILE *f)
   return ch;
 }
 
+void HAL_SYSTICK_Callback(void)
+{
+  if (zlg7290.state == (ZLG7290State)Normal) { 
+    if (zlg7290.idleTicks >= ZLG7290MaxIdleTicks) {
+      if (zlg7290.needSwitchState == 0)
+        zlg7290.needSwitchState = 1;
+    } else {
+      zlg7290.idleTicks++;
+    }
+  }
+}
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-    /* 接收到EXTI13时，读取ZLG7290按键�?? */
+    /* 接收到EXTI13时，读取ZLG7290按键 */
     if (GPIO_Pin == GPIO_PIN_13) {
-        zlg7290_canRead = 1;
+        zlg7290.canRead = 1;
+        zlg7290.idleTicks = 0;
     }
 }
 
