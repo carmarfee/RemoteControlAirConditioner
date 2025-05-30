@@ -39,7 +39,7 @@
 #include "zlg7290.h"
 #include "DC_motor.h"
 #include "LM75A.h"
-
+#include "beep.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -53,6 +53,7 @@
 #define BeepDelay 40
 zlg7290h zlg7290;
 uint8_t actualTemp = 1;
+uint8_t targetTemp = 24; // 目标温度
 
 /* USER CODE END PV */
 
@@ -95,63 +96,86 @@ int main(void)
   LM75SetMode(CONF_ADDR, NORMOR_MODE); // set LM75A to normal mode
   initLED();                           // initialize LED buffer
   HAL_TIM_Base_Start_IT(&htim3);       // start timer3
- /*  printf("\n\r======= RemoteControlAirConditioner =======\n\r");
-  printf("\n\rWelcome to RCAC!!!\n\r");
-  printf("\n\rYou should press the power key to start the system.\n\r"); */
+  // printf("\n\r======= RemoteControlAirConditioner =======\n\r");
+  // printf("\n\rWelcome to RCAC!!!\n\r");
+  // printf("\n\rYou should press the power key to start the system.\n\r");
   /* USER CODE END 2 */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    if (zlg7290.canRead == 1) {
-        zlg7290.canRead = 0;
-        I2C_ZLG7290_Read(&hi2c1,0x71,0x01,&zlg7290.readBuffer,1);
-        beepOnce(BeepDelay);
-        switch (zlg7290.readBuffer) {
-            case 0x19:  //A
-                if (zlg7290.needSwitchState == 0 && zlg7290.state == (ZLG7290State)Sleep)
-                  zlg7290.needSwitchState = 1;
-                if (targetTemp < 30)
-                    updateLED_T(++targetTemp);
-                break;
-            case 0x11:  //B
-                if (zlg7290.needSwitchState == 0 && zlg7290.state == (ZLG7290State)Sleep)
-                  zlg7290.needSwitchState = 1;
-                if (targetTemp > 16)
-                    updateLED_T(--targetTemp);
-                break;
-            case 0x01: //D
-                /* 此处写power按钮逻辑 */
-                if (zlg7290.needSwitchState == 0 && zlg7290.state == (ZLG7290State)Normal)
-                  zlg7290.needSwitchState = 1;
-                break;
-            default:
-                if (zlg7290.needSwitchState == 0 && zlg7290.state == (ZLG7290State)Sleep)
-                  zlg7290.needSwitchState = 1;
-                break;
-        }
-        zlg7290.readBuffer = 0;
+    if (zlg7290.canRead == 1)
+    {
+      zlg7290.canRead = 0;
+      I2C_ZLG7290_Read(&hi2c1, 0x71, 0x01, &zlg7290.readBuffer, 1);
+      beepOnce(BeepDelay);
+      switch (zlg7290.readBuffer)
+      {
+      case 0x19: // A
+        if (zlg7290.needSwitchState == 0 && zlg7290.state == (ZLG7290State)Sleep)
+          zlg7290.needSwitchState = 1;
+        if (targetTemp < 30)
+          updateLED_T(++targetTemp);
+        break;
+      case 0x11: // B
+        if (zlg7290.needSwitchState == 0 && zlg7290.state == (ZLG7290State)Sleep)
+          zlg7290.needSwitchState = 1;
+        if (targetTemp > 16)
+          updateLED_T(--targetTemp);
+        break;
+      case 0x01: // D
+        /* 此处写power按钮逻辑 */
+        if (zlg7290.needSwitchState == 0 && zlg7290.state == (ZLG7290State)Normal)
+          zlg7290.needSwitchState = 1;
+        break;
+      default:
+        if (zlg7290.needSwitchState == 0 && zlg7290.state == (ZLG7290State)Sleep)
+          zlg7290.needSwitchState = 1;
+        break;
+      }
+      zlg7290.readBuffer = 0;
     }
-    if (zlg7290.needSwitchState == 1) {
-      if (zlg7290.state == (ZLG7290State)Normal) {
+    if (zlg7290.needSwitchState == 1)
+    {
+      if (zlg7290.state == (ZLG7290State)Normal)
+      {
         zlg7290.needSwitchState = 0;
         zlg7290.state = (ZLG7290State)Sleep;
         updateLED(nullBuffer);
-      } else {
+        DC_Task(0); // off
+      }
+      else
+      {
         zlg7290.needSwitchState = 0;
         zlg7290.state = (ZLG7290State)Normal;
         updateLED(LED_Buffer);
       }
     }
-    if (actualTemp > targetTemp) {
+    if (actualTemp > targetTemp)
+    {
       /* TODO:驱动直流电机 */
-    } else {
-      /* TODO:关闭直流电机 */
+      if (actualTemp - targetTemp == 0)
+      {
+        DC_Task(0); // off
+      }
+      else if (actualTemp - targetTemp > 0 && actualTemp - targetTemp <= 2)
+      {
+        DC_Task(1); // 低速
+      }
+      else if (actualTemp - targetTemp > 2 && actualTemp - targetTemp <= 4)
+      {
+        DC_Task(2); // 中速
+      }
+      else if (actualTemp - targetTemp > 4)
+      {
+        DC_Task(3); // 高速
+      }
     }
-
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
+    else
+    {
+      /* TODO:关闭直流电机 */
+      DC_Task(0); // off
+    }
   }
   /* USER CODE END 3 */
 }
@@ -210,22 +234,28 @@ int fputc(int ch, FILE *f)
 
 void HAL_SYSTICK_Callback(void)
 {
-  if (zlg7290.state == (ZLG7290State)Normal) { 
-    if (zlg7290.idleTicks >= ZLG7290MaxIdleTicks) {
+  if (zlg7290.state == (ZLG7290State)Normal)
+  {
+    if (zlg7290.idleTicks >= ZLG7290MaxIdleTicks)
+    {
       if (zlg7290.needSwitchState == 0)
         zlg7290.needSwitchState = 1;
-    } else {
+    }
+    else
+    {
       zlg7290.idleTicks++;
     }
   }
 }
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-    /* 接收到EXTI13时，读取ZLG7290按键 */
-    if (GPIO_Pin == GPIO_PIN_13) {
-        zlg7290.canRead = 1;
-        zlg7290.idleTicks = 0;
-    }
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  /* 接收到EXTI13时，读取ZLG7290按键 */
+  if (GPIO_Pin == GPIO_PIN_13)
+  {
+    zlg7290.canRead = 1;
+    zlg7290.idleTicks = 0;
+  }
 }
 
 /* USER CODE END 4 */

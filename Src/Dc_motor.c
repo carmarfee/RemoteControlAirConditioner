@@ -19,58 +19,16 @@ void I2C_DC_Motor_Write(I2C_HandleTypeDef *I2Cx, uint8_t I2C_Addr, uint8_t addr,
 		HAL_Delay(5);
 	}
 }
-uint8_t fs_flag = 0;
-void DC_Task(uint8_t iKey)
+void DC_Task(int speed)
 {
-	uint8_t Buffer_DC[1] = {0Xff};
-	uint8_t Buffer_DC_Zero[1] = {0x00};
-	uint8_t addr;
-	uint8_t *buffer;
-
-	switch (iKey)
+	uint8_t Buffer_DC[2] = {0X00, 0xff};		// 直流电机速度4档
+	uint8_t addr[4] = {0x00, 0x03, 0x05, 0x0A}; // 直流电机速度4档对应寄存器地址
+	if (speed == 0)
 	{
-	case 0x1C: // 1
-		DC_Motor_Pin_Low();
-		fs_flag = 1; // zheng
-		addr = 0x0F;
-		buffer = Buffer_DC_Zero;
-		break;
-	case 0x1B: // 2
-		DC_Motor_Pin_Low();
-		fs_flag = 1; // zheng
-		addr = 0x03;
-		buffer = Buffer_DC;
-		break;
-	case 0x1A: // 3
-		DC_Motor_Pin_Low();
-		fs_flag = 1; // zheng
-		addr = 0x0F;
-		buffer = Buffer_DC;
-		break;
-	case 0x14: // 4
-		DC_MOtor_Pin_High();
-		fs_flag = 0; // zheng
-		addr = 0x0A;
-		buffer = Buffer_DC;
-		break;
-	case 0x13: // 5
-		DC_MOtor_Pin_High();
-		fs_flag = 0; // zheng
-		addr = 0x05;
-		buffer = Buffer_DC;
-		break;
-	case 0x12: // 6
-		DC_MOtor_Pin_High();
-		fs_flag = 0; // zheng
-		addr = 0x03;
-		buffer = Buffer_DC;
-		break;
-	default:
-		DC_Motor_Pin_Low();
-		fs_flag = 2; // zheng
-		addr = 0x00;
-		buffer = Buffer_DC_Zero;
-		break;
+		I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, addr[speed], &Buffer_DC[0], 1);
 	}
-	I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, addr, buffer, 1);
+	else
+	{
+		I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, addr[speed], &Buffer_DC[1], 1);
+	}
 }

@@ -8,7 +8,6 @@
 "rcac\i2c.o"
 "rcac\usart.o"
 "rcac\dc_motor.o"
-"rcac\led.o"
 "rcac\lm75a.o"
 "rcac\zlg7290.o"
 "rcac\beep.o"
