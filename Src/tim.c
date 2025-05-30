@@ -124,6 +124,12 @@ typedef enum {
 static uint16_t tim3Counter = 0;
 extern SystemState currentState;
 
+/* 
+ * 在Normal工作模式下，count为400的倍数时读取一次温度
+ * 在Sleep工作模式下，count为2000的倍数时读取一次温度
+ * 在PowerOff工作模式下，不读取温度
+ */
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
   if (htim->Instance != TIM3)
     return;
@@ -154,15 +160,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
   }
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+/* void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim->Instance == TIM3)
   {
-    /* 
-     * 在Normal工作模式下，count为400的倍数时读取一次温度
-     * 在Sleep工作模式下，count为2000的倍数时读取一次温度
-     * 在PowerOff工作模式下，不读取温度
-     */
+    
     if (currentState != STATE_POWEROFF)
     {
       tim3Counter++;
@@ -182,7 +184,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       }
     }
   }
-}
+} */
 /* USER CODE END 1 */
 
 /**
