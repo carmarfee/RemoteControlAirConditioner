@@ -50,7 +50,25 @@ void initLED(void)
 {
     for (int i = 0; i <= 7; i++)
         setLEDBuffer(i, 0);
-    updateLED_T(targetTemp);
+    
+    const uint8_t ten_digit = targetTemp / 10;
+    const uint8_t single_digit = targetTemp % 10;
+
+    if (setLEDBuffer(2, ten_digit))
+    {
+#if DEBUG
+        printf("initLED() - setLEDBuffer(2, ten_digit)操作出错了!\n");
+#endif
+        return;
+    }
+
+    if (setLEDBuffer(3, single_digit))
+    {
+#if DEBUG
+        printf("initLED() - setLEDBuffer(3, single_digit)操作出错了!\n");
+#endif
+        return;
+    }
 }
 
 /*******************************************************************************

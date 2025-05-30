@@ -49,17 +49,47 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-#define ZLG7290MaxIdleTicks 60000
-#define BeepDelay 40
-zlg7290h zlg7290;
-uint8_t actualTemp = 1;
-uint8_t targetTemp = 24; // ç›®æ ‡æ¸©åº¦
+
+#define ZLG7290MaxIdleTicks 60000 /* ZLG7290°´¼üÎŞ²Ù×÷×î´óÊ±¼äãĞÖµ */
+#define BeepDelay 40 /* ·äÃùÆ÷ÑÓÊ± */
+
+typedef enum {
+  SPEED_LEVEL_0, /* ·çÉÈÍ£×ª */
+  SPEED_LEVEL_1, /* µµÎ»1 */
+  SPEED_LEVEL_2, /* µµÎ»2 */
+  SPEED_LEVEL_3, /* µµÎ»3 */
+}FanSpeed;
+
+typedef enum {
+  STATE_NORMAL, /* Õı³£Ä£Ê½ */
+  STATE_SLEEP, /* Ë¯ÃßÄ£Ê½ */
+  STATE_POWEROFF, /* ¹Ø»úÄ£Ê½ */
+}SystemState;
+
+uint8_t zlg7290ReadBuffer = 0; /* ZLG7290¼üÖµ»º³åÇø */
+uint8_t zlg7290CanRead = 0; /* ZLG7290ÊÇ·ñ¿É¶Á±êÖ¾ */
+uint16_t zlg7290IdleTicks = 0; /* ZLG7290°´¼üÎ´±»°´ÏÂÊ±¼äÀÛ¼ÓÆ÷ */
+
+SystemState currentState = STATE_POWEROFF; /* Í¨µçÊ±¹¤×÷×´Ì¬ÎªPowerOff */
+FanSpeed currentSpeedLevel = SPEED_LEVEL_1; /* Ä¬ÈÏ·çÉÈ×ªËÙÎª1µµ */
+FanSpeed lastSpeedLevel = SPEED_LEVEL_0;
+
+uint8_t powerBtnPressed = 0; /* power°´Å¥±»°´ÏÂ±êÖ¾ */
+uint8_t anyBtnPressed = 0; /* ÈÎÒâ°´Å¥±»°´ÏÂ±êÖ¾ */
+
+uint8_t actualTemp = 1; /* Êµ¼ÊÎÂ¶È */
+uint8_t targetTemp = 24; /* Ä¿±êÎÂ¶È */
+
+const uint8_t Buffer_DC[2] = {0x00, 0xff};
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void Error_Handler(void);
+void handleKey(void);
+void handleStateMachine(void);
+void handleDCMotor(void);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
@@ -71,11 +101,6 @@ void Error_Handler(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  zlg7290.readBuffer = 0;
-  zlg7290.canRead = 0;
-  zlg7290.idleTicks = 0;
-  zlg7290.state = (ZLG7290State)Normal;
-  zlg7290.needSwitchState = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -96,86 +121,46 @@ int main(void)
   LM75SetMode(CONF_ADDR, NORMOR_MODE); // set LM75A to normal mode
   initLED();                           // initialize LED buffer
   HAL_TIM_Base_Start_IT(&htim3);       // start timer3
-  // printf("\n\r======= RemoteControlAirConditioner =======\n\r");
-  // printf("\n\rWelcome to RCAC!!!\n\r");
-  // printf("\n\rYou should press the power key to start the system.\n\r");
+
   /* USER CODE END 2 */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    if (zlg7290.canRead == 1)
+    /* Ö´ĞĞ¶Á¼üÖµÂß¼­ */
+    if (zlg7290CanRead == 1)
     {
-      zlg7290.canRead = 0;
-      I2C_ZLG7290_Read(&hi2c1, 0x71, 0x01, &zlg7290.readBuffer, 1);
-      beepOnce(BeepDelay);
-      switch (zlg7290.readBuffer)
-      {
-      case 0x19: // A
-        if (zlg7290.needSwitchState == 0 && zlg7290.state == (ZLG7290State)Sleep)
-          zlg7290.needSwitchState = 1;
-        if (targetTemp < 30)
-          updateLED_T(++targetTemp);
-        break;
-      case 0x11: // B
-        if (zlg7290.needSwitchState == 0 && zlg7290.state == (ZLG7290State)Sleep)
-          zlg7290.needSwitchState = 1;
-        if (targetTemp > 16)
-          updateLED_T(--targetTemp);
-        break;
-      case 0x01: // D
-        /* æ­¤å¤„å†™poweræŒ‰é’®é€»è¾‘ */
-        if (zlg7290.needSwitchState == 0 && zlg7290.state == (ZLG7290State)Normal)
-          zlg7290.needSwitchState = 1;
-        break;
-      default:
-        if (zlg7290.needSwitchState == 0 && zlg7290.state == (ZLG7290State)Sleep)
-          zlg7290.needSwitchState = 1;
-        break;
-      }
-      zlg7290.readBuffer = 0;
+      /* ÖØÖÃ¶ÁÈ¡±êÖ¾£¬¶Á¼üÖµ */
+      zlg7290CanRead = 0;
+      I2C_ZLG7290_Read(&hi2c1, 0x71, 0x01, &zlg7290ReadBuffer, 1);
+
+      /* ³É¹¦¶ÁÈ¡¼üÖµ£¬ÖØÖÃÎŞ²Ù×÷Ê±¼ä£¬´¥·¢·äÃùÆ÷ÏìÓ¦ */
+      if (currentState == STATE_SLEEP)
+        anyBtnPressed = 1;
+      if (currentState == STATE_NORMAL)
+        zlg7290IdleTicks = 0;
+      if (currentState != STATE_POWEROFF)
+        beepOnce(BeepDelay);
+
+      /* ¸ù¾İ¶Á»º³åÇøÖĞµÄ¼üÖµ£¬Ö´ĞĞ²»Í¬Âß¼­ */
+      handleKey();
+
+      /* ÖØÖÃ¶Á»º³åÇø£¬±ÜÃâÓ°ÏìÏÂÒ»´Î¶ÁÈ¡ */
+      zlg7290ReadBuffer = 0;
     }
-    if (zlg7290.needSwitchState == 1)
-    {
-      if (zlg7290.state == (ZLG7290State)Normal)
-      {
-        zlg7290.needSwitchState = 0;
-        zlg7290.state = (ZLG7290State)Sleep;
-        updateLED(nullBuffer);
-        DC_Task(0); // off
-      }
-      else
-      {
-        zlg7290.needSwitchState = 0;
-        zlg7290.state = (ZLG7290State)Normal;
-        updateLED(LED_Buffer);
-      }
-    }
-    if (actualTemp > targetTemp)
-    {
-      /* TODO:é©±åŠ¨ç›´æµç”µæœº */
-      if (actualTemp - targetTemp == 0)
-      {
-        DC_Task(0); // off
-      }
-      else if (actualTemp - targetTemp > 0 && actualTemp - targetTemp <= 2)
-      {
-        DC_Task(1); // ä½é€Ÿ
-      }
-      else if (actualTemp - targetTemp > 2 && actualTemp - targetTemp <= 4)
-      {
-        DC_Task(2); // ä¸­é€Ÿ
-      }
-      else if (actualTemp - targetTemp > 4)
-      {
-        DC_Task(3); // é«˜é€Ÿ
-      }
-    }
-    else
-    {
-      /* TODO:å…³é—­ç›´æµç”µæœº */
-      DC_Task(0); // off
-    }
+
+    /* Ö´ĞĞ×´Ì¬ÇĞ»»Âß¼­ */
+    handleStateMachine();
+
+    /* ÑÓÊ±Ò»¶ÎÊ±¼ä£¬È·±£actualTemp¸üĞÂ */
+    HAL_Delay(100);
+
+    /* Ö´ĞĞÇı¶¯Ö±Á÷µç»úÂß¼­ */
+    if (currentState != STATE_POWEROFF)
+      handleDCMotor();
+
+    /* ÑÓÊ±Ò»¶ÎÊ±¼ä£¬·ÀÖ¹×ÜÏß×èÈû */
+    HAL_Delay(100);
   }
   /* USER CODE END 3 */
 }
@@ -232,29 +217,205 @@ int fputc(int ch, FILE *f)
   return ch;
 }
 
+/* ÏµÍ³Ê±ÖÓÖĞ¶Ï */
 void HAL_SYSTICK_Callback(void)
 {
-  if (zlg7290.state == (ZLG7290State)Normal)
-  {
-    if (zlg7290.idleTicks >= ZLG7290MaxIdleTicks)
-    {
-      if (zlg7290.needSwitchState == 0)
-        zlg7290.needSwitchState = 1;
-    }
-    else
-    {
-      zlg7290.idleTicks++;
-    }
-  }
+  /* ÈôÊıÂë¹Üµ±Ç°¹¤×÷×´Ì¬ÎªNormalÇÒÎŞ²Ù×÷Ê±¼äÎ´³¬¹ıãĞÖµ£¬ÔòÀÛ¼ÓÎŞ²Ù×÷Ê±¼ä */
+  if (currentState == STATE_NORMAL && zlg7290IdleTicks < ZLG7290MaxIdleTicks)
+    zlg7290IdleTicks++;
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-  /* æ¥æ”¶åˆ°EXTI13æ—¶ï¼Œè¯»å–ZLG7290æŒ‰é”® */
+  /* ½ÓÊÕµ½EXTI13Ê±£¬ÉèÖÃzlg7290°´¼ü¶ÁÈ¡±êÖ¾ */
   if (GPIO_Pin == GPIO_PIN_13)
   {
-    zlg7290.canRead = 1;
-    zlg7290.idleTicks = 0;
+    zlg7290CanRead = 1;
+  }
+}
+
+void handleKey(void)
+{
+  switch (zlg7290ReadBuffer)
+  {
+    /* °´¼üA£º(Normal | SleepÓĞĞ§)Ê¹targetTempÔö¼Ó1£¬ÉÏÏŞ30 */
+    case 0x19:
+      if (currentState == STATE_NORMAL || currentState == STATE_SLEEP)
+      {
+        if (targetTemp < 30)
+          updateLED_T(++targetTemp);
+      }
+      break;
+    /* °´¼üB£º(Normal | SleepÓĞĞ§)Ê¹targetTemp¼õÉÙ1£¬ÏÂÏŞ16 */
+    case 0x11:
+      if (currentState == STATE_NORMAL || currentState == STATE_SLEEP)
+      {
+        if (targetTemp > 16)
+          updateLED_T(--targetTemp);
+      }
+      break;
+    /* °´¼ü1£º(Normal | SleepÓĞĞ§)ÉèÖÃfanSpeedLevelÎªSPEED_LEVEL_1 */
+    case 0x1C:
+      if (currentState == STATE_NORMAL || currentState == STATE_SLEEP)
+      {
+        currentSpeedLevel = SPEED_LEVEL_1;
+      }
+      break;
+    /* °´¼ü2£º(Normal | SleepÓĞĞ§)ÉèÖÃfanSpeedLevelÎªSPEED_LEVEL_2 */
+    case 0x1B:
+      if (currentState == STATE_NORMAL || currentState == STATE_SLEEP)
+      {
+        currentSpeedLevel = SPEED_LEVEL_2;
+      }
+      break;
+    /* °´¼ü3£º(Normal | SleepÓĞĞ§)ÉèÖÃfanSpeedLevelÎªSPEED_LEVEL_3 */
+    case 0x1A:
+      if (currentState == STATE_NORMAL || currentState == STATE_SLEEP)
+      {
+        currentSpeedLevel = SPEED_LEVEL_3;
+      }
+      break;
+    /* °´¼üD£º(Ê¼ÖÕÓĞĞ§)power°´Å¥£¬½øĞĞNormal/SleepºÍPowerOffÖ®¼äµÄ×´Ì¬ÇĞ»» */
+    case 0x01:
+      powerBtnPressed = 1;
+      break;
+    /* ÆäËû°´¼ü£ºÎŞ²Ù×÷ */
+    default:
+      break;
+  }
+}
+
+void handleStateMachine(void)
+{
+  /* 
+   * ÔÚNormalºÍSleepÄ£Ê½ÏÂ£¬´æÔÚ¿ª»ú/¹Ø»úºÍNormal/SleepÁ½ÖÖ×´Ì¬×ª»»
+   * ´¦ÀíÓÅÏÈ¼¶: ¿ª»ú/¹Ø»ú×´Ì¬×ª»» > Normal/Sleep×´Ì¬×ª»»
+   * ²¢ÇÒ´¦Àí¿ª»ú/¹Ø»úºó£¬²»ÔÙ´¦ÀíNormal/Sleep
+   * ÔÚPowerOffÄ£Ê½ÏÂ£¬½ö´æÔÚ¿ª»ú/¹Ø»ú×´Ì¬×ª»»£¬½öÍ¨¹ı±êÖ¾Î»ÅĞ¶ÏÊÇ·ñĞèÒª×ª»»¿ª»ú¼´¿É
+   */
+  switch(currentState)
+  {
+    case STATE_NORMAL:
+      /* Ö´ĞĞ¹Ø»úÂß¼­ */
+      if (powerBtnPressed == 1)
+      {
+        powerBtnPressed = 0;
+        /* Ï¨ÃğÊıÂë¹Ü */
+        updateLED(nullBuffer);
+
+        /* ¹Ø±Õ·çÉÈ(Èô±¾¹Ø±Õ£¬Ôò²»²Ù×÷) */
+        if (lastSpeedLevel != SPEED_LEVEL_0)
+        {
+          /* Í£×ª */
+          I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, 0x00, &Buffer_DC[0], 1);
+          lastSpeedLevel = SPEED_LEVEL_0;
+        }
+
+        currentState = STATE_POWEROFF;
+      }
+      /* Ö´ĞĞ×ª»»µ½Sleep×´Ì¬Âß¼­ */
+      else if (zlg7290IdleTicks == ZLG7290MaxIdleTicks)
+      {
+        zlg7290IdleTicks = 0;
+        /* Ï¨Ãğ8¶Î7Î»ÊıÂë¹Ü */
+        updateLED(nullBuffer);
+
+        currentState = STATE_SLEEP;
+      }
+      break;
+    case STATE_SLEEP:
+      /* Ö´ĞĞ¹Ø»úÂß¼­ */
+      if (powerBtnPressed == 1)
+      {
+        powerBtnPressed = 0;
+        /* ¹Ø±Õ·çÉÈ(Èô±¾¹Ø±Õ£¬Ôò²»²Ù×÷) */
+        if (lastSpeedLevel != SPEED_LEVEL_0)
+        {
+          /* Í£×ª */
+          I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, 0x00, &Buffer_DC[0], 1);
+          lastSpeedLevel = SPEED_LEVEL_0;
+        }
+
+        currentState = STATE_POWEROFF;
+      }
+      /* Ö´ĞĞ×ª»»µ½Normal×´Ì¬Âß¼­ */
+      else if (anyBtnPressed == 1)
+      {
+        anyBtnPressed = 0;
+        /* µãÁÁ8¶Î7Î»ÊıÂë¹Ü */
+        updateLED(LED_Buffer);
+
+        currentState = STATE_NORMAL;
+      }
+      break;
+    case STATE_POWEROFF:
+      /* Ö´ĞĞ¿ª»úÂß¼­ */
+      if (powerBtnPressed == 1)
+      {
+        powerBtnPressed = 0;
+        /* ¶ÁÈ¡³öÊµ¼ÊÎÂ¶È£¬½«Æä¸³Öµ¸øactualTemp */
+        actualTemp = LM75A_TimerReadTemperature();
+        while (actualTemp == 1) {
+          actualTemp = LM75A_TimerReadTemperature();
+          HAL_Delay(20);
+        }
+        
+        /* (ÓÃÊµ¼ÊÎÂ¶È¸üĞÂLED_Bufferºó)µãÁÁ8¶Î7Î»ÊıÂë¹Ü */
+        updateLED_A(actualTemp);
+        
+        /* ·äÃùÆ÷Ïì */
+        beepOnce(BeepDelay);
+
+        currentState = STATE_NORMAL;
+      }
+      break;
+    default:
+      /* ²»»á³öÏÖÕâÖÖÇé¿ö */
+      break;
+  }
+}
+
+void handleDCMotor(void)
+{
+  /* Èç¹ûÊµ¼ÊÎÂ¶È´óÓÚÄ¿±êÎÂ¶È£¬ÔòĞè¿ªÆô·çÉÈ»òµ÷ÕûÕıÔÚÔË×ªµÄ·çÉÈ×ªËÙ */
+  if (actualTemp > targetTemp)
+  {
+    /* Èç¹ûÉÏÒ»´Î·çÉÈ×ªËÙºÍÕâ´ÎÏàÍ¬£¬ÔòÎŞĞè¸Ä±ä×ªËÙ */
+    if (lastSpeedLevel != currentSpeedLevel)
+    {
+      /* Èç¹û²»Í¬£¬¸Ä±ä·çÉÈ×ªËÙ */
+      DC_Motor_Pin_High();
+      switch(currentSpeedLevel)
+      {
+        /* ÕıÏò×ªËÙ1 */
+        case SPEED_LEVEL_1:
+          I2C_DC_Motor_Write(&hi2c1,DC_Motor_Addr,0x0A,&Buffer_DC[1],1);
+          break;
+        /* ÕıÏò×ªËÙ2 */
+        case SPEED_LEVEL_2:
+          I2C_DC_Motor_Write(&hi2c1,DC_Motor_Addr,0x05,&Buffer_DC[1],1);
+          break;
+        /* ÕıÏò×ªËÙ3 */
+        case SPEED_LEVEL_3:
+          I2C_DC_Motor_Write(&hi2c1,DC_Motor_Addr,0x03,&Buffer_DC[1],1);
+          break;
+        default:
+          /* ²»»á³öÏÖÕâÖÖÇé¿ö */
+          break;
+      }
+      /* ÖØÖÃÉÏÒ»´Î×ªËÙÎªµ±Ç°×ªËÙ */
+      lastSpeedLevel = currentSpeedLevel;
+    }
+  }
+  /* Èç¹ûÊµ¼ÊÎÂ¶È²»´óÓÚÄ¿±êÎÂ¶È£¬ÔòÍ£Ö¹ÕıÔÚÔË×ªµÄ·çÉÈ£»Èô·çÉÈ±¾¾ÍÍ£×ª£¬ÔòÎŞ±ä»¯ */
+  else
+  {
+    if (lastSpeedLevel != SPEED_LEVEL_0)
+    {
+      /* Í£×ª */
+      I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, 0x00, &Buffer_DC[0], 1);
+      lastSpeedLevel = SPEED_LEVEL_0;
+    }
   }
 }
 

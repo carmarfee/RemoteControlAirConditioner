@@ -19,10 +19,15 @@ void I2C_DC_Motor_Write(I2C_HandleTypeDef *I2Cx, uint8_t I2C_Addr, uint8_t addr,
 		HAL_Delay(5);
 	}
 }
-void DC_Task(int speed)
+
+
+
+/* void DC_Task(FanSpeed speedLevel)
 {
 	uint8_t Buffer_DC[2] = {0X00, 0xff};		// 直流电机速度4档
 	uint8_t addr[4] = {0x00, 0x03, 0x05, 0x0A}; // 直流电机速度4档对应寄存器地址
+
+	switch (speedLevel)
 	if (speed == 0)
 	{
 		I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, addr[speed], &Buffer_DC[0], 1);
@@ -31,4 +36,4 @@ void DC_Task(int speed)
 	{
 		I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, addr[speed], &Buffer_DC[1], 1);
 	}
-}
+} */
