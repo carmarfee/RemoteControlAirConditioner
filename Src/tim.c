@@ -130,7 +130,8 @@ extern SystemState currentState;
  * 在PowerOff工作模式下，不读取温度
  */
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
   if (htim->Instance != TIM3)
     return;
   
@@ -143,13 +144,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
   /* 根据模式选择不同的采样频率 */
   uint16_t sampleInterval = (currentState == STATE_NORMAL) ? 400 : 2000;
   
-  if (tim3Counter % sampleInterval == 0) {
+  if (tim3Counter % sampleInterval == 0)
+  {
     /* 读取温度并更新显示 */
     HAL_GPIO_TogglePin(GPIOH, GPIO_PIN_15);  // 调试用LED
     
     uint8_t newTemp = LM75A_TimerReadTemperature();
     
-    if (newTemp != 1 && currentState == STATE_NORMAL && newTemp != actualTemp) {
+    if (newTemp != 1 && currentState == STATE_NORMAL && newTemp != actualTemp)
+    {
       actualTemp = newTemp;
       updateLED_A(actualTemp); 
     }

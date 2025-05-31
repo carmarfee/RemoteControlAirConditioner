@@ -52,6 +52,7 @@
 
 #define ZLG7290MaxIdleTicks 60000 /* ZLG7290按键无操作最大时间阈值 */
 #define BeepDelay 40 /* 蜂鸣器延时 */
+#define DefaultTargetTemp 24 /* 默认目标温度 */
 
 typedef enum {
   SPEED_LEVEL_0, /* 风扇停转 */
@@ -78,7 +79,7 @@ uint8_t powerBtnPressed = 0; /* power按钮被按下标志 */
 uint8_t anyBtnPressed = 0; /* 任意按钮被按下标志 */
 
 uint8_t actualTemp = 1; /* 实际温度 */
-uint8_t targetTemp = 24; /* 目标温度 */
+uint8_t targetTemp = DefaultTargetTemp; /* 目标温度 */
 
 const uint8_t Buffer_DC[2] = {0x00, 0xff};
 
@@ -307,6 +308,7 @@ void handleStateMachine(void)
         if (lastSpeedLevel != SPEED_LEVEL_0)
         {
           /* 停转 */
+          DC_Motor_Pin_Low();
           I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, 0x00, &Buffer_DC[0], 1);
           lastSpeedLevel = SPEED_LEVEL_0;
         }
@@ -332,6 +334,7 @@ void handleStateMachine(void)
         if (lastSpeedLevel != SPEED_LEVEL_0)
         {
           /* 停转 */
+          DC_Motor_Pin_Low();
           I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, 0x00, &Buffer_DC[0], 1);
           lastSpeedLevel = SPEED_LEVEL_0;
         }
@@ -369,8 +372,8 @@ void handleStateMachine(void)
         currentState = STATE_NORMAL;
       }
       break;
+    /* 不会出现这种情况 */
     default:
-      /* 不会出现这种情况 */
       break;
   }
 }
@@ -399,8 +402,8 @@ void handleDCMotor(void)
         case SPEED_LEVEL_3:
           I2C_DC_Motor_Write(&hi2c1,DC_Motor_Addr,0x03,&Buffer_DC[1],1);
           break;
+        /* 不会出现这种情况 */
         default:
-          /* 不会出现这种情况 */
           break;
       }
       /* 重置上一次转速为当前转速 */
@@ -413,6 +416,7 @@ void handleDCMotor(void)
     if (lastSpeedLevel != SPEED_LEVEL_0)
     {
       /* 停转 */
+      DC_Motor_Pin_Low();
       I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, 0x00, &Buffer_DC[0], 1);
       lastSpeedLevel = SPEED_LEVEL_0;
     }
