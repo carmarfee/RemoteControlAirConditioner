@@ -368,6 +368,7 @@ void handleStateMachine(void)
       if (powerBtnPressed == 1)
       {
         powerBtnPressed = 0;
+        anyBtnPressed = 0;
         /* 关闭风扇(若本关闭，则不操作) */
         if (currentSpeedLevel != SPEED_LEVEL_0)
         {
