@@ -82,7 +82,7 @@ uint16_t zlg7290IdleTicks = 0; /* ZLG7290按键未被按下时间累加器 */
 SystemState currentState = STATE_POWEROFF; /* 通电时工作状态为PowerOff */
 FanSpeed targetSpeedLevel = SPEED_LEVEL_1; /* 默认风扇转速为1档 */
 FanSpeed currentSpeedLevel = SPEED_LEVEL_0;
-MarqueeStatus marqueeStatus = MARQUEE_OFF;
+MarqueeStatus currentMarqueeStatus = MARQUEE_OFF;
 
 uint8_t powerBtnPressed = 0; /* power按钮被按下标志 */
 uint8_t anyBtnPressed = 0; /* 任意按钮被按下标志 */
@@ -389,9 +389,6 @@ void handleStateMachine(void)
         /* 点亮8段7位数码管 */
         updateLED(LED_Buffer);
 
-        /* 关闭Marquee */
-        turnOffMarquee();
-
         currentState = STATE_NORMAL;
       }
       break;
@@ -485,22 +482,22 @@ void handleMarquee(void)
     /* 点亮D1 */
     case SPEED_LEVEL_0:
       HAL_GPIO_WritePin(GPIOF,GPIO_PIN_10,GPIO_PIN_RESET);
-      marqueeStatus = MARQUEE_D1;
+      currentMarqueeStatus = MARQUEE_D1;
       break;
     /* 点亮D2 */
     case SPEED_LEVEL_1:
       HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_RESET);
-      marqueeStatus = MARQUEE_D2;
+      currentMarqueeStatus = MARQUEE_D2;
       break;
     /* 点亮D3 */
     case SPEED_LEVEL_2:
       HAL_GPIO_WritePin(GPIOB,GPIO_PIN_15,GPIO_PIN_RESET);
-      marqueeStatus = MARQUEE_D3;
+      currentMarqueeStatus = MARQUEE_D3;
       break;
     /* 点亮D4 */
     case SPEED_LEVEL_3:
       HAL_GPIO_WritePin(GPIOH,GPIO_PIN_15,GPIO_PIN_RESET);
-      marqueeStatus = MARQUEE_D4;
+      currentMarqueeStatus = MARQUEE_D4;
       break;
     /* 不会出现这种情况 */
     default:
@@ -511,7 +508,7 @@ void handleMarquee(void)
 /* 关闭当前Marquee */
 void turnOffMarquee(void)
 {
-  switch (marqueeStatus)
+  switch (currentMarqueeStatus)
   {
     /* 熄灭D1 */
     case MARQUEE_D1:
@@ -534,7 +531,7 @@ void turnOffMarquee(void)
       break;
   }
 
-  marqueeStatus = MARQUEE_OFF;
+  currentMarqueeStatus = MARQUEE_OFF;
 }
 
 void initMarquee(void)
@@ -543,7 +540,7 @@ void initMarquee(void)
   HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_SET);
   HAL_GPIO_WritePin(GPIOB,GPIO_PIN_15,GPIO_PIN_SET);
   HAL_GPIO_WritePin(GPIOH,GPIO_PIN_15,GPIO_PIN_SET);
-  marqueeStatus = MARQUEE_OFF;
+  currentMarqueeStatus = MARQUEE_OFF;
 }
 
 /* USER CODE END 4 */
