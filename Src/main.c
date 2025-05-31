@@ -406,6 +406,9 @@ void handleStateMachine(void)
 
         /* 设置工作模式为NORMAL，之后TIM3中断读取温度将点亮LED */
         currentState = STATE_NORMAL;
+
+        /* 立即使用actualTemp点亮LED */
+        updateLED_A(actualTemp);
       }
       break;
     case STATE_POWEROFF:
@@ -425,8 +428,10 @@ void handleStateMachine(void)
 
         while (actualTemp == 1)
         {
-          /* 无限循环直到成功从LM75A读取到有效温度 */
+          /* 无限循环直到actualTemp是一个有效温度 */
         }
+
+        /* 若actualTemp是一个有效温度，则此时LED灯已打开 */
                 
         /* 蜂鸣器响 */
         beepOnce(BeepDelay * 3);
