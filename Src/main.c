@@ -105,7 +105,6 @@ void handleKey(void);
 void handleStateMachine(void);
 void handleDCMotor(void);
 void handleMarquee(void);
-void turnOnMarquee(FanSpeed speedLevel);
 void turnOffMarquee(void);
 void initMarquee(void);
 /* USER CODE END PFP */
@@ -481,13 +480,7 @@ void handleMarquee(void)
   turnOffMarquee();
 
   /* 根据风速点亮对应Marquee */
-  turnOnMarquee(lastSpeedLevel);
-}
-
-/* 根据风速点亮对应Marquee */
-void turnOnMarquee(FanSpeed speedLevel)
-{
-  switch (speedLevel)
+  switch (lastSpeedLevel)
   {
     /* 点亮D1 */
     case SPEED_LEVEL_0:
