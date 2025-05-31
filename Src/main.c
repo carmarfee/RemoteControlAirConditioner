@@ -89,7 +89,9 @@ uint8_t anyBtnPressed = 0; /* 任意按钮被按下标志 */
 
 uint8_t actualTemp = 1; /* 实际温度 */
 uint8_t targetTemp = DefaultTargetTemp; /* 目标温度 */
-uint32_t unStartFlag __at (0x40003FF4);
+
+uint32_t unStartFlag __at (0x40003FF4); /* 热启动MagicNumber保存位置 */
+
 const uint8_t Buffer_DC[2] = {0x00, 0xff};
 
 /* USER CODE END PV */
@@ -116,10 +118,11 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-  /* USER CODE END 1 */
   if(unStartFlag!=0xAA55AA55)//冷启动处理
   {
     unStartFlag=0xAA55AA55;
+  /* USER CODE END 1 */
+  
   /* MCU Configuration----------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
@@ -136,9 +139,9 @@ int main(void)
   MX_IWDG_Init();
 
   /* USER CODE BEGIN 2 */
-  LM75SetMode(CONF_ADDR, NORMOR_MODE); // set LM75A to normal mode
-  initLED();                           // initialize LED buffer
-  HAL_TIM_Base_Start_IT(&htim3);       // start timer3
+  LM75SetMode(CONF_ADDR, SHUTDOWN_MODE);
+  initLED();
+  HAL_TIM_Base_Start_IT(&htim3);
   initMarquee();
   }
   /* USER CODE END 2 */
@@ -265,9 +268,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   /* 接收到EXTI13时，设置zlg7290按键读取标志 */
   if (GPIO_Pin == GPIO_PIN_13)
-  {
     zlg7290CanRead = 1;
-  }
 }
 
 void handleKey(void)
@@ -336,6 +337,13 @@ void handleStateMachine(void)
       if (powerBtnPressed == 1)
       {
         powerBtnPressed = 0;
+
+        /* 设置工作状态为PowerOff，不再从LM75A读取温度 */
+        currentState = STATE_POWEROFF;
+
+        /* 设置LM75A为关断模式 */
+        LM75SetMode(CONF_ADDR, SHUTDOWN_MODE);
+
         /* 熄灭数码管 */
         updateLED(nullBuffer);
 
@@ -350,20 +358,20 @@ void handleStateMachine(void)
 
         /* 关闭Marquee */
         turnOffMarquee();
-
-        currentState = STATE_POWEROFF;
       }
       /* 执行转换到Sleep状态逻辑 */
-      else if (zlg7290IdleTicks == ZLG7290MaxIdleTicks)
+      else if (zlg7290IdleTicks >= ZLG7290MaxIdleTicks)
       {
         zlg7290IdleTicks = 0;
+
+        /* 设置工作模式为SLEEP，之后TIM3中断读取温度不再点亮LED */
+        currentState = STATE_SLEEP;
+        
         /* 熄灭8段7位数码管 */
         updateLED(nullBuffer);
 
         /* 关闭Marquee */
         turnOffMarquee();
-
-        currentState = STATE_SLEEP;
       }
       break;
     case STATE_SLEEP:
@@ -372,6 +380,13 @@ void handleStateMachine(void)
       {
         powerBtnPressed = 0;
         anyBtnPressed = 0;
+
+        /* 设置工作状态为PowerOff，不再从LM75A读取温度 */
+        currentState = STATE_POWEROFF;
+
+        /* 设置LM75A为关断模式 */
+        LM75SetMode(CONF_ADDR, SHUTDOWN_MODE);
+
         /* 关闭风扇(若本关闭，则不操作) */
         if (currentSpeedLevel != SPEED_LEVEL_0)
         {
@@ -383,16 +398,13 @@ void handleStateMachine(void)
 
         /* 关闭Marquee */
         turnOffMarquee();
-
-        currentState = STATE_POWEROFF;
       }
       /* 执行转换到Normal状态逻辑 */
       else if (anyBtnPressed == 1)
       {
         anyBtnPressed = 0;
-        /* 点亮8段7位数码管 */
-        updateLED(LED_Buffer);
 
+        /* 设置工作模式为NORMAL，之后TIM3中断读取温度将点亮LED */
         currentState = STATE_NORMAL;
       }
       break;
@@ -400,19 +412,24 @@ void handleStateMachine(void)
       /* 执行开机逻辑 */
       if (powerBtnPressed == 1)
       {
+        powerBtnPressed = 0;
+
+        /* 设置LM75A工作模式为正常工作模式 */
+        LM75SetMode(CONF_ADDR, NORMOR_MODE);
+
+        /* 延时一段时间，让LM75A做好读取温度的准备 */
+        HAL_Delay(100);
+
+        /* 设置currentState为NORMAL 之后可以通过TIM3中断从LM75A读取温度并点亮LED */
+        currentState = STATE_NORMAL;
+
         while (actualTemp == 1)
         {
           /* 无限循环直到成功从LM75A读取到有效温度 */
         }
-        powerBtnPressed = 0;
-        
-        /* (用实际温度更新LED_Buffer后)点亮8段7位数码管 */
-        updateLED_A(actualTemp);
-        
+                
         /* 蜂鸣器响 */
-        beepOnce(BeepDelay);
-
-        currentState = STATE_NORMAL;
+        beepOnce(BeepDelay * 3);
       }
       break;
     /* 不会出现这种情况 */
@@ -426,7 +443,7 @@ void handleDCMotor(void)
   /* 如果实际温度大于目标温度，则需开启风扇或调整正在运转的风扇转速 */
   if (actualTemp > targetTemp)
   {
-    /* 如果上一次风扇转速和这次相同，则无需改变转速 */
+    /* 如果当前风扇转速和目标相同，则无需改变转速 */
     if (currentSpeedLevel != targetSpeedLevel)
     {
       /* 如果不同，改变风扇转速 */
@@ -449,7 +466,7 @@ void handleDCMotor(void)
         default:
           break;
       }
-      /* 重置上一次转速为当前转速 */
+      /* 设置当前转速为目标转速 */
       currentSpeedLevel = targetSpeedLevel;
     }
   }
