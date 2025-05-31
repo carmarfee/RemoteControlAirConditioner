@@ -127,8 +127,7 @@ extern SystemState currentState;
 
 /* 
  * 在Normal工作模式下，count为400的倍数时读取一次温度
- * 在Sleep工作模式下，count为2000的倍数时读取一次温度
- * 在PowerOff工作模式下，不读取温度
+ * 在Sleep和PowerOff工作模式下，count为2000的倍数时读取一次温度
  */
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
@@ -136,9 +135,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim->Instance != TIM3)
     return;
   
-  /* PowerOff模式不进行任何操作 */
-  if (currentState == STATE_POWEROFF)
-    return;
 
   tim3Counter++;  // 计数器递增（Normal/Sleep模式）
   
@@ -146,16 +142,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   uint16_t sampleInterval = (currentState == STATE_NORMAL) ? 400 : 2000;
   
   if (tim3Counter % sampleInterval == 0)
-  {
-    /* 读取温度并更新显示 */
-    HAL_GPIO_TogglePin(GPIOH, GPIO_PIN_15);  // 调试用LED
-    
+  { 
     uint8_t newTemp = LM75A_TimerReadTemperature();
     
-    if (newTemp != 1 && currentState == STATE_NORMAL && newTemp != actualTemp)
+    if (newTemp != 1 && newTemp != actualTemp)
     {
       actualTemp = newTemp;
-      updateLED_A(actualTemp); 
+      if (currentState == STATE_NORMAL)
+        updateLED_A(actualTemp); 
     }
     
     /* 计数器归零防止溢出 */

@@ -397,13 +397,11 @@ void handleStateMachine(void)
       /* 执行开机逻辑 */
       if (powerBtnPressed == 1)
       {
-        powerBtnPressed = 0;
-        /* 读取出实际温度，将其赋值给actualTemp */
-        actualTemp = LM75A_TimerReadTemperature();
-        while (actualTemp == 1) {
-          actualTemp = LM75A_TimerReadTemperature();
-          HAL_Delay(20);
+        while (actualTemp == 1)
+        {
+          /* 无限循环直到成功从LM75A读取到有效温度 */
         }
+        powerBtnPressed = 0;
         
         /* (用实际温度更新LED_Buffer后)点亮8段7位数码管 */
         updateLED_A(actualTemp);

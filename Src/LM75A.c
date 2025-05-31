@@ -72,35 +72,58 @@ double LM75GetTempValue(uint16_t tempreg)
 	return TempValue;
 }
 
-#define BUFFER_SIZE 10 // Define the size of the buffer for moving average
+#define BUFFER_SIZE 10
 
 uint8_t tempBuffer[BUFFER_SIZE] = {0};
 uint8_t bufferIndex = 0;
 uint16_t tempSum = 0;
+uint8_t callCount = 0;
+
 /**
- * @brief 通过定时器中断读取温度。定时器回调函数执行的内容。
+ * @brief 通过定时器中断读取温度。定时器回调函数执行的内容。去极值平均滤波。
  *
  */
 uint8_t LM75A_TimerReadTemperature(void)
 {
-	uint8_t actualTemp = getActualTemp();
-	if (actualTemp != 1) // Check if the temperature reading is valid
-	{
-		// Update the buffer with the new temperature reading
-		tempSum -= tempBuffer[bufferIndex];
-		tempBuffer[bufferIndex] = actualTemp;
-		tempSum += tempBuffer[bufferIndex];
-
-		// Move to the next index in the buffer
-		bufferIndex = (bufferIndex + 1) % BUFFER_SIZE;
-
-		if (bufferIndex >= 9) {
-			actualTemp = tempSum / BUFFER_SIZE;
-		}
-		
-		return actualTemp;
+	uint8_t newTemp = getActualTemp();
+    
+    /* 第10次及以后的逻辑 */
+    if (newTemp != 1)
+    {
+        /* 更新缓冲区 */
+        tempSum -= tempBuffer[bufferIndex];
+        tempBuffer[bufferIndex] = newTemp;
+        tempSum += tempBuffer[bufferIndex];
+        
+        bufferIndex = (bufferIndex + 1) % BUFFER_SIZE;
 	}
-	return 1;
+
+	/* 前9次调用直接返回1 */
+	if (callCount < 9)
+	{
+		callCount++;
+		return 1;
+	}
+
+	/* 第10次及之后调用执行以下逻辑，此时缓冲区已填满 */
+	
+	/* 计算去极值平均值 */
+	uint8_t min = 0xFF;
+	uint8_t max = 0;
+	
+	/* 找出最大值和最小值 */
+	for (uint8_t i = 0; i < BUFFER_SIZE; i++)
+	{
+		if (tempBuffer[i] < min) 
+			min = tempBuffer[i];
+		if (tempBuffer[i] > max) 
+			max = tempBuffer[i];
+	}
+	
+	/* 计算去极值平均值 (总和 - 最大值 - 最小值) / (BUFFER_SIZE - 2) */
+	newTemp = (tempSum - min - max) / (BUFFER_SIZE - 2);
+
+	return newTemp;
 }
 
 /*******************************************************************************
