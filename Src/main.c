@@ -80,8 +80,8 @@ uint8_t zlg7290CanRead = 0; /* ZLG7290是否可读标志 */
 uint16_t zlg7290IdleTicks = 0; /* ZLG7290按键未被按下时间累加器 */
 
 SystemState currentState = STATE_POWEROFF; /* 通电时工作状态为PowerOff */
-FanSpeed currentSpeedLevel = SPEED_LEVEL_1; /* 默认风扇转速为1档 */
-FanSpeed lastSpeedLevel = SPEED_LEVEL_0;
+FanSpeed targetSpeedLevel = SPEED_LEVEL_1; /* 默认风扇转速为1档 */
+FanSpeed currentSpeedLevel = SPEED_LEVEL_0;
 MarqueeStatus marqueeStatus = MARQUEE_OFF;
 
 uint8_t powerBtnPressed = 0; /* power按钮被按下标志 */
@@ -291,21 +291,21 @@ void handleKey(void)
     case 0x1C:
       if (currentState == STATE_NORMAL || currentState == STATE_SLEEP)
       {
-        currentSpeedLevel = SPEED_LEVEL_1;
+        targetSpeedLevel = SPEED_LEVEL_1;
       }
       break;
     /* 按键2：(Normal | Sleep有效)设置fanSpeedLevel为SPEED_LEVEL_2 */
     case 0x1B:
       if (currentState == STATE_NORMAL || currentState == STATE_SLEEP)
       {
-        currentSpeedLevel = SPEED_LEVEL_2;
+        targetSpeedLevel = SPEED_LEVEL_2;
       }
       break;
     /* 按键3：(Normal | Sleep有效)设置fanSpeedLevel为SPEED_LEVEL_3 */
     case 0x1A:
       if (currentState == STATE_NORMAL || currentState == STATE_SLEEP)
       {
-        currentSpeedLevel = SPEED_LEVEL_3;
+        targetSpeedLevel = SPEED_LEVEL_3;
       }
       break;
     /* 按键D：(始终有效)power按钮，进行Normal/Sleep和PowerOff之间的状态切换 */
@@ -337,12 +337,12 @@ void handleStateMachine(void)
         updateLED(nullBuffer);
 
         /* 关闭风扇(若本关闭，则不操作) */
-        if (lastSpeedLevel != SPEED_LEVEL_0)
+        if (currentSpeedLevel != SPEED_LEVEL_0)
         {
           /* 停转 */
           DC_Motor_Pin_Low();
           I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, 0x00, &Buffer_DC[0], 1);
-          lastSpeedLevel = SPEED_LEVEL_0;
+          currentSpeedLevel = SPEED_LEVEL_0;
         }
 
         /* 关闭Marquee */
@@ -369,12 +369,12 @@ void handleStateMachine(void)
       {
         powerBtnPressed = 0;
         /* 关闭风扇(若本关闭，则不操作) */
-        if (lastSpeedLevel != SPEED_LEVEL_0)
+        if (currentSpeedLevel != SPEED_LEVEL_0)
         {
           /* 停转 */
           DC_Motor_Pin_Low();
           I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, 0x00, &Buffer_DC[0], 1);
-          lastSpeedLevel = SPEED_LEVEL_0;
+          currentSpeedLevel = SPEED_LEVEL_0;
         }
 
         /* 关闭Marquee */
@@ -428,11 +428,11 @@ void handleDCMotor(void)
   if (actualTemp > targetTemp)
   {
     /* 如果上一次风扇转速和这次相同，则无需改变转速 */
-    if (lastSpeedLevel != currentSpeedLevel)
+    if (currentSpeedLevel != targetSpeedLevel)
     {
       /* 如果不同，改变风扇转速 */
       DC_Motor_Pin_High();
-      switch (currentSpeedLevel)
+      switch (targetSpeedLevel)
       {
         /* 正向转速1 */
         case SPEED_LEVEL_1:
@@ -451,18 +451,18 @@ void handleDCMotor(void)
           break;
       }
       /* 重置上一次转速为当前转速 */
-      lastSpeedLevel = currentSpeedLevel;
+      currentSpeedLevel = targetSpeedLevel;
     }
   }
   /* 如果实际温度不大于目标温度，则停止正在运转的风扇；若风扇本就停转，则无变化 */
   else
   {
-    if (lastSpeedLevel != SPEED_LEVEL_0)
+    if (currentSpeedLevel != SPEED_LEVEL_0)
     {
       /* 停转 */
       DC_Motor_Pin_Low();
       I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, 0x00, &Buffer_DC[0], 1);
-      lastSpeedLevel = SPEED_LEVEL_0;
+      currentSpeedLevel = SPEED_LEVEL_0;
     }
   }
 }
@@ -472,7 +472,7 @@ void handleMarquee(void)
   /*
    * 四个小LED灯点亮与当前的风速有关
    * 同一时间只有一个灯点亮，它代表着当前风扇转速
-   * 即在转速被修改后的lastSpeedLevel值
+   * 即在转速被修改后的currentSpeedLevel值
    * 在点亮前还需熄灭上一次点亮的灯
    */
 
@@ -480,7 +480,7 @@ void handleMarquee(void)
   turnOffMarquee();
 
   /* 根据风速点亮对应Marquee */
-  switch (lastSpeedLevel)
+  switch (currentSpeedLevel)
   {
     /* 点亮D1 */
     case SPEED_LEVEL_0:
