@@ -153,13 +153,14 @@ int main(void)
     /* 执行状态切换逻辑 */
     handleStateMachine();
 
-    /* 延时一段时间，确保actualTemp更新 */
-    HAL_Delay(100);
-
     /* 执行驱动直流电机逻辑 */
     if (currentState != STATE_POWEROFF)
+    {
+      /* 延时一段时间，确保actualTemp更新 */
+      HAL_Delay(100);
       handleDCMotor();
-
+    }
+      
     /* 延时一段时间，防止总线阻塞 */
     HAL_Delay(100);
   }
