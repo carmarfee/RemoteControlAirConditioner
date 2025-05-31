@@ -89,7 +89,7 @@ uint8_t anyBtnPressed = 0; /* 任意按钮被按下标志 */
 
 uint8_t actualTemp = 1; /* 实际温度 */
 uint8_t targetTemp = DefaultTargetTemp; /* 目标温度 */
-
+uint32_t unStartFlag __at (0x40003FF4);
 const uint8_t Buffer_DC[2] = {0x00, 0xff};
 
 /* USER CODE END PV */
@@ -117,7 +117,9 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
   /* USER CODE END 1 */
-
+  if(unStartFlag!=0xAA55AA55)//冷启动处理
+  {
+    unStartFlag=0xAA55AA55;
   /* MCU Configuration----------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
@@ -138,6 +140,7 @@ int main(void)
   initLED();                           // initialize LED buffer
   HAL_TIM_Base_Start_IT(&htim3);       // start timer3
   initMarquee();
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
