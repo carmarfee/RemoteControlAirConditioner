@@ -3,8 +3,8 @@
 #include "i2c.h"
 #include "usart.h"
 
-volatile uint16_t LM75A_Temperature = 0; // �洢���¶�ȡ���¶�
-volatile uint8_t LM75A_ReadReady = 0;	 // ��־λ��ָʾ�Ƿ����µ��¶����ݿ���
+volatile uint16_t LM75A_Temperature = 0;
+volatile uint8_t LM75A_ReadReady = 0;
 
 /**
  * @brief 甚至温度传感器的工作模式
