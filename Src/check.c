@@ -1,3 +1,5 @@
+#include "check.h"
+
 SystemState getSystemState(void)///异或校验读取当前工作状态
  {
     uint8_t temp_checksum = (uint8_t)currentState ^ 0xA5;
