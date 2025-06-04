@@ -36,9 +36,9 @@
 #include "tim.h"
 
 /* USER CODE BEGIN 0 */
-extern uint8_t actualTemp;
-extern uint8_t targetTemp;
-extern zlg7290h zlg7290;
+#include "mxconstants.h"
+#include "led.h"
+#include "LM75A.h"
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim3;
@@ -114,16 +114,7 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 } 
 
 /* USER CODE BEGIN 1 */
-
-
-typedef enum {
-  STATE_NORMAL, /* 正常模式 */
-  STATE_SLEEP, /* 睡眠模式 */
-  STATE_POWEROFF, /* 关机模式 */
-}SystemState;
-
 static uint16_t tim3Counter = 0;
-extern SystemState currentState;
 
 /* 
  * 在Normal工作模式下，count为400的倍数时读取一次温度
@@ -137,27 +128,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     return;
 
   /* 当前工作模式为PowerOff时不执行后面逻辑 */
-  if (currentState == STATE_POWEROFF)
+  if (systemState.currentState == STATE_POWEROFF && systemState.tempReadCnt == TEMPBUFFER_SIZE - 1)
     return;
   
   tim3Counter++;
   
   /* 根据模式选择不同的采样频率 */
-  uint16_t sampleInterval = (currentState == STATE_NORMAL) ? 400 : 2000;
+  uint16_t sampleInterval = (systemState.currentState == STATE_NORMAL) ? 20 : 60;
   
   if (tim3Counter % sampleInterval == 0)
   { 
-    uint8_t newTemp = LM75A_TimerReadTemperature();
+    uint8_t newTemp = readActualTemp();
+    //printf("newtemp:%d  idleticks:0x%x  tempReadCnt:%d\n", newTemp, systemState.zlg7290KeyStates.idleTicks, systemState.tempReadCnt);
     
     /* 读取的是一个有效温度且和当前温度不同时才替换当前温度 */
-    if (newTemp != 1 && newTemp != actualTemp)
+    if (newTemp != 1 && newTemp != systemState.actualTemp)
     {
-      /* 用当前有效温度替换actualTemp */
-      actualTemp = newTemp;
-
-      /* 只有Normal模式才会使用actualTemp更新LED_Buffer并点亮LED */
-      if (currentState == STATE_NORMAL)
-        updateLED_A(actualTemp); 
+      systemState.actualTemp = newTemp;
+      if (systemState.currentState == STATE_NORMAL)
+        updateLED();
     }
     
     /* 计数器归零防止溢出 */
@@ -166,31 +155,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
 }
 
-/* void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-  if (htim->Instance == TIM3)
-  {
-    
-    if (currentState != STATE_POWEROFF)
-    {
-      tim3Counter++;
-
-    }
-    if (tim3Counter % 400 == 0)
-    {
-      HAL_GPIO_TogglePin(GPIOH, GPIO_PIN_15);
-      uint8_t resultTemp = LM75A_TimerReadTemperature();
-      if (resultTemp != 1 && zlg7290.state == (ZLG7290State)Normal)
-      {
-        actualTemp = resultTemp;
-        updateLED_A(actualTemp);
-      }
-      else{
-        updateLED_A(actualTemp);
-      }
-    }
-  }
-} */
 /* USER CODE END 1 */
 
 /**

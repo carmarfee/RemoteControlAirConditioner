@@ -36,12 +36,76 @@
   /* Includes ------------------------------------------------------------------*/
 
 /* USER CODE BEGIN Includes */
-
+#include "stdint.h"
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
 
 /* USER CODE BEGIN Private defines */
+#define ZLG7290MaxIdleTicks 0x000A000 /* ZLG7290按键无操作最大时间阈值 */
+#define BeepDelay 10 /* 蜂鸣器延时 */
+#define DefaultTargetTemp 28 /* 默认目标温度 */
+#define MagicNumber 0xAA55AA55
+
+#define LEDBUFFER_SIZE 8 /* ledBuffer大小 */
+#define TEMPBUFFER_SIZE 10 /* tempBuffer大小 */
+
+typedef enum {
+  SPEED_LEVEL_0, /* 风扇停转 */
+  SPEED_LEVEL_1, /* 档位1 */
+  SPEED_LEVEL_2, /* 档位2 */
+  SPEED_LEVEL_3, /* 档位3 */
+}FanState;
+
+typedef enum {
+  MARQUEE_OFF,  /* Marquee关闭 */
+  MARQUEE_D1, /* D1被点亮 */
+  MARQUEE_D2, /* D2被点亮 */
+  MARQUEE_D3, /* D3被点亮 */
+  MARQUEE_D4, /* D4被点亮 */
+}MarqueeState;
+
+typedef enum {
+  STATE_NORMAL, /* 正常模式 */
+  STATE_SLEEP, /* 睡眠模式 */
+  STATE_POWEROFF, /* 关机模式 */
+}SystemState;
+
+struct ZLG7290KeyStates
+{
+  uint8_t readBuffer; /* ZLG7290键值缓冲区 */
+  uint8_t canRead; /* ZLG7290是否可读标志 */
+  uint32_t idleTicks; /* ZLG7290按键未被按下时间累加器 */
+  uint8_t powerBtnPressed; /* power按钮被按下标志 */
+  uint8_t anyBtnPressed; /* 任意按钮被按下标志 */
+};
+
+struct FanStates
+{
+  FanState targetSpeedLevel; /* 默认风扇转速为1档 */
+  FanState currentSpeedLevel;
+};
+
+typedef struct
+{
+  struct ZLG7290KeyStates zlg7290KeyStates;
+  struct FanStates fanStates;
+  
+  MarqueeState currentMarqueeState;
+  SystemState currentState; /* 通电时工作状态为PowerOff */
+
+  uint8_t actualTemp; /* 实际温度 */
+  uint8_t targetTemp; /* 目标温度 */
+
+  uint8_t ledBuffer[LEDBUFFER_SIZE];
+
+  uint8_t tempBuffer[TEMPBUFFER_SIZE];
+  uint16_t tempSum;
+  uint8_t tempBufferIndex;
+  uint8_t tempReadCnt;
+}SystemStateBlock;
+
+extern SystemStateBlock systemState;
 
 /* USER CODE END Private defines */
 

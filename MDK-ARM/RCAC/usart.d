@@ -3,12 +3,12 @@ rcac\usart.o: ../Inc/usart.h
 rcac\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 rcac\usart.o: ../Inc/stm32f4xx_hal_conf.h
 rcac\usart.o: ../Inc/mxconstants.h
+rcac\usart.o: E:\EmbededSystemTools\keil5\ARM\ARMCC\Bin\..\include\stdint.h
 rcac\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h
 rcac\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h
 rcac\usart.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h
 rcac\usart.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h
 rcac\usart.o: ../Drivers/CMSIS/Include/core_cm4.h
-rcac\usart.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\stdint.h
 rcac\usart.o: ../Drivers/CMSIS/Include/core_cmInstr.h
 rcac\usart.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
 rcac\usart.o: ../Drivers/CMSIS/Include/core_cmFunc.h
@@ -16,7 +16,7 @@ rcac\usart.o: ../Drivers/CMSIS/Include/core_cmSimd.h
 rcac\usart.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h
 rcac\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 rcac\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-rcac\usart.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\stdio.h
+rcac\usart.o: E:\EmbededSystemTools\keil5\ARM\ARMCC\Bin\..\include\stdio.h
 rcac\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc_ex.h
 rcac\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio.h
 rcac\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio_ex.h
@@ -28,6 +28,7 @@ rcac\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h
 rcac\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h
 rcac\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_i2c.h
 rcac\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_i2c_ex.h
+rcac\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_iwdg.h
 rcac\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h
 rcac\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h
 rcac\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h

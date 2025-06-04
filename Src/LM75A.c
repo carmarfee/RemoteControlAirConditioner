@@ -2,6 +2,7 @@
 #include "stm32f4xx_hal.h"
 #include "i2c.h"
 #include "usart.h"
+#include "mxconstants.h"
 
 volatile uint16_t LM75A_Temperature = 0;
 volatile uint8_t LM75A_ReadReady = 0;
@@ -72,18 +73,31 @@ double LM75GetTempValue(uint16_t tempreg)
 	return TempValue;
 }
 
-#define BUFFER_SIZE 10
 
-uint8_t tempBuffer[BUFFER_SIZE] = {0};
-uint8_t bufferIndex = 0;
-uint16_t tempSum = 0;
-uint8_t callCount = 0;
+
+uint8_t getActualTemp()
+{
+	uint16_t newTemp = LM75GetTempReg();
+	if (newTemp == 1)
+	{
+		return 1;
+	}
+
+	if (newTemp & (0x01 << 16))
+	{
+		return ((!newTemp) + 1) >> 3;
+	}
+	else
+	{
+		return newTemp >> 3;
+	}
+}
 
 /**
  * @brief 通过定时器中断读取温度。定时器回调函数执行的内容。去极值平均滤波。
  *
  */
-uint8_t LM75A_TimerReadTemperature(void)
+uint8_t readActualTemp(void)
 {
 	uint8_t newTemp = getActualTemp();
     
@@ -91,19 +105,25 @@ uint8_t LM75A_TimerReadTemperature(void)
     if (newTemp != 1)
     {
         /* 更新缓冲区 */
-        tempSum -= tempBuffer[bufferIndex];
-        tempBuffer[bufferIndex] = newTemp;
-        tempSum += tempBuffer[bufferIndex];
+        systemState.tempSum -= systemState.tempBuffer[systemState.tempBufferIndex];
+        systemState.tempBuffer[systemState.tempBufferIndex] = newTemp;
+        systemState.tempSum += systemState.tempBuffer[systemState.tempBufferIndex];
         
-        bufferIndex = (bufferIndex + 1) % BUFFER_SIZE;
+        systemState.tempBufferIndex = (systemState.tempBufferIndex + 1) % TEMPBUFFER_SIZE;
+
+		if (systemState.tempReadCnt < TEMPBUFFER_SIZE - 1)
+		{
+			systemState.tempReadCnt++;
+			return newTemp;
+		}
+	}
+	else
+	{
+		return 1;
 	}
 
 	/* 前9次调用直接返回1 */
-	if (callCount < 9)
-	{
-		callCount++;
-		return 1;
-	}
+
 
 	/* 第10次及之后调用执行以下逻辑，此时缓冲区已填满 */
 	
@@ -112,43 +132,18 @@ uint8_t LM75A_TimerReadTemperature(void)
 	uint8_t max = 0;
 	
 	/* 找出最大值和最小值 */
-	for (uint8_t i = 0; i < BUFFER_SIZE; i++)
+	for (uint8_t i = 0; i < TEMPBUFFER_SIZE; i++)
 	{
-		if (tempBuffer[i] < min) 
-			min = tempBuffer[i];
-		if (tempBuffer[i] > max) 
-			max = tempBuffer[i];
+		if (systemState.tempBuffer[i] < min) 
+			min = systemState.tempBuffer[i];
+		if (systemState.tempBuffer[i] > max) 
+			max = systemState.tempBuffer[i];
 	}
 	
 	/* 计算去极值平均值 (总和 - 最大值 - 最小值) / (BUFFER_SIZE - 2) */
-	newTemp = (tempSum - min - max) / (BUFFER_SIZE - 2);
+	newTemp = (systemState.tempSum - min - max) / (TEMPBUFFER_SIZE - 2);
 
 	return newTemp;
 }
 
-/*******************************************************************************
- * Function Name  : getActualTemp
- * Description    : 接口函数 - 获取实际温度(整数)
- * Input          : None
- * Output         : None
- * Return         : OK - actualTemp
- *				   Error - 1
- * Attention      : None
- *******************************************************************************/
-uint8_t getActualTemp()
-{
-	uint16_t actualTemp = LM75GetTempReg();
-	if (actualTemp == 1)
-	{
-		return 1;
-	}
 
-	if (actualTemp & (0x01 << 16))
-	{
-		return ((!actualTemp) + 1) >> 3;
-	}
-	else
-	{
-		return actualTemp >> 3;
-	}
-}

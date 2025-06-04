@@ -869,13 +869,13 @@ ARM Macro Assembler    Page 14
               00000000 
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp --apcs=int
-erwork --depend=rcac\startup_stm32f407xx.d -orcac\startup_stm32f407xx.o -IC:\Us
-ers\lenovo\Desktop\嵌入式系统\综合设计实验\Remote_Control_Air_Conditioner\MDK-A
-RM\RTE -ID:\MKD5.21\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include -ID:\MKD5.21\ARM\PAC
-K\Keil\STM32F4xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include --predefin
-e="__EVAL SETA 1" --predefine="__MICROLIB SETA 1" --predefine="__UVISION_VERSIO
-N SETA 521" --predefine="_RTE_ SETA 1" --predefine="STM32F407xx SETA 1" --list=
-startup_stm32f407xx.lst startup_stm32f407xx.s
+erwork --depend=rcac\startup_stm32f407xx.d -orcac\startup_stm32f407xx.o -IE:\20
+25SpringSemester\EmbeddedSystemExp\RemoteControlAirConditioner\MDK-ARM\RTE -IE:
+\EmbededSystemTools\keil5\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include -IE:\EmbededSy
+stemTools\keil5\ARM\PACK\Keil\STM32F4xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32
+F4xx\Include --predefine="__EVAL SETA 1" --predefine="__MICROLIB SETA 1" --pred
+efine="__UVISION_VERSION SETA 521" --predefine="_RTE_ SETA 1" --predefine="STM3
+2F407xx SETA 1" --list=startup_stm32f407xx.lst startup_stm32f407xx.s
 
 
 
