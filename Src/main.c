@@ -58,6 +58,8 @@ SystemStateBlock systemState;
 
 uint8_t Buffer_DC[2] = {0x00, 0xff};
 
+volatile uint32_t *unStartFlag = (volatile uint32_t *)0x10000000;
+
 
 /* USER CODE END PV */
 
@@ -84,9 +86,9 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-  // if (unStartFlag != MagicNumber) /* 如果是第一次启动 */
-  // {
-    // unStartFlag = MagicNumber;
+  if (*unStartFlag != MagicNumber) /* 如果是第一次启动 */
+  {
+    *unStartFlag = MagicNumber;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -109,7 +111,34 @@ int main(void)
   LM75SetMode(CONF_ADDR, NORMOR_MODE);
   HAL_TIM_Base_Start_IT(&htim3);
   initMarquee();
-  // }
+  printf("cold\n");
+  }
+  else
+  {
+      /* USER CODE END 1 */
+
+  /* MCU Configuration----------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
+
+  /* Configure the system clock */
+  SystemClock_Config();
+
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_I2C1_Init();
+  MX_USART1_UART_Init();
+  MX_TIM3_Init();
+  MX_IWDG_Init();
+
+  /* USER CODE BEGIN 2 */
+  initSystemState();
+  LM75SetMode(CONF_ADDR, NORMOR_MODE);
+  HAL_TIM_Base_Start_IT(&htim3);
+  initMarquee();
+    printf("hot\n");
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
