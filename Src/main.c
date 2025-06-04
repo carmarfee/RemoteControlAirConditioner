@@ -211,7 +211,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/10000);
 
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
@@ -385,6 +385,8 @@ void handleStateMachine(void)
 
         /* 设置工作模式为NORMAL，之后TIM3中断读取温度将点亮LED */
         systemState.currentState = STATE_NORMAL;
+
+        updateLED();
       }
       break;
     case STATE_POWEROFF:
@@ -412,7 +414,7 @@ void handleStateMachine(void)
         updateLED();
                 
         /* 蜂鸣器响 */
-        beepOnce(BeepDelay);
+        beepOnce(BeepDelay * 10);
       }
       break;
     /* 不会出现这种情况 */

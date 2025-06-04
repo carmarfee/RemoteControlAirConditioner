@@ -42,7 +42,7 @@
 /* Private define ------------------------------------------------------------*/
 
 /* USER CODE BEGIN Private defines */
-#define ZLG7290MaxIdleTicks 0x000A000 /* ZLG7290按键无操作最大时间阈值 */
+#define ZLG7290MaxIdleTicks 0x00020000 /* ZLG7290按键无操作最大时间阈值 */
 #define BeepDelay 10 /* 蜂鸣器延时 */
 #define DefaultTargetTemp 28 /* 默认目标温度 */
 #define MagicNumber 0xAA55AA55

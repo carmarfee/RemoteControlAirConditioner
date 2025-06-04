@@ -134,7 +134,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   tim3Counter++;
   
   /* 根据模式选择不同的采样频率 */
-  uint16_t sampleInterval = (systemState.currentState == STATE_NORMAL) ? 20 : 60;
+  uint16_t sampleInterval = (systemState.currentState == STATE_SLEEP) ? 60 : 20;
   
   if (tim3Counter % sampleInterval == 0)
   { 
@@ -142,7 +142,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     //printf("newtemp:%d  idleticks:0x%x  tempReadCnt:%d\n", newTemp, systemState.zlg7290KeyStates.idleTicks, systemState.tempReadCnt);
     
     /* 读取的是一个有效温度且和当前温度不同时才替换当前温度 */
-    if (newTemp != 1 && newTemp != systemState.actualTemp)
+    if (newTemp != 1 && newTemp)
     {
       systemState.actualTemp = newTemp;
       if (systemState.currentState == STATE_NORMAL)
