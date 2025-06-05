@@ -2,7 +2,7 @@ rcac\stm32f4xx_hal_i2c.o: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.
 rcac\stm32f4xx_hal_i2c.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 rcac\stm32f4xx_hal_i2c.o: ../Inc/stm32f4xx_hal_conf.h
 rcac\stm32f4xx_hal_i2c.o: ../Inc/mxconstants.h
-rcac\stm32f4xx_hal_i2c.o: E:\EmbededSystemTools\keil5\ARM\ARMCC\Bin\..\include\stdint.h
+rcac\stm32f4xx_hal_i2c.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\stdint.h
 rcac\stm32f4xx_hal_i2c.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h
 rcac\stm32f4xx_hal_i2c.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h
 rcac\stm32f4xx_hal_i2c.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h
@@ -15,7 +15,7 @@ rcac\stm32f4xx_hal_i2c.o: ../Drivers/CMSIS/Include/core_cmSimd.h
 rcac\stm32f4xx_hal_i2c.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h
 rcac\stm32f4xx_hal_i2c.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 rcac\stm32f4xx_hal_i2c.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-rcac\stm32f4xx_hal_i2c.o: E:\EmbededSystemTools\keil5\ARM\ARMCC\Bin\..\include\stdio.h
+rcac\stm32f4xx_hal_i2c.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\stdio.h
 rcac\stm32f4xx_hal_i2c.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc_ex.h
 rcac\stm32f4xx_hal_i2c.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio.h
 rcac\stm32f4xx_hal_i2c.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio_ex.h

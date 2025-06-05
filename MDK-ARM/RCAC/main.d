@@ -2,7 +2,7 @@ rcac\main.o: ../Src/main.c
 rcac\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 rcac\main.o: ../Inc/stm32f4xx_hal_conf.h
 rcac\main.o: ../Inc/mxconstants.h
-rcac\main.o: E:\EmbededSystemTools\keil5\ARM\ARMCC\Bin\..\include\stdint.h
+rcac\main.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\stdint.h
 rcac\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h
 rcac\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h
 rcac\main.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h
@@ -15,7 +15,7 @@ rcac\main.o: ../Drivers/CMSIS/Include/core_cmSimd.h
 rcac\main.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h
 rcac\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 rcac\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-rcac\main.o: E:\EmbededSystemTools\keil5\ARM\ARMCC\Bin\..\include\stdio.h
+rcac\main.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\stdio.h
 rcac\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc_ex.h
 rcac\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio.h
 rcac\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio_ex.h
@@ -40,8 +40,8 @@ rcac\main.o: ../Inc/usart.h
 rcac\main.o: ../Inc/gpio.h
 rcac\main.o: ../Inc/zlg7290.h
 rcac\main.o: ../Inc/LM75A.h
-rcac\main.o: E:\EmbededSystemTools\keil5\ARM\ARMCC\Bin\..\include\stdlib.h
-rcac\main.o: E:\EmbededSystemTools\keil5\ARM\ARMCC\Bin\..\include\string.h
+rcac\main.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\stdlib.h
+rcac\main.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\string.h
 rcac\main.o: ../Inc/Dc_motor.h
 rcac\main.o: ../Inc/beep.h
 rcac\main.o: ../Inc/led.h

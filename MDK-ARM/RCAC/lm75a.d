@@ -1,12 +1,12 @@
 rcac\lm75a.o: ..\Src\LM75A.c
 rcac\lm75a.o: ../Inc/LM75A.h
-rcac\lm75a.o: E:\EmbededSystemTools\keil5\ARM\ARMCC\Bin\..\include\stdio.h
-rcac\lm75a.o: E:\EmbededSystemTools\keil5\ARM\ARMCC\Bin\..\include\stdlib.h
-rcac\lm75a.o: E:\EmbededSystemTools\keil5\ARM\ARMCC\Bin\..\include\string.h
+rcac\lm75a.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\stdio.h
+rcac\lm75a.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\stdlib.h
+rcac\lm75a.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\string.h
 rcac\lm75a.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 rcac\lm75a.o: ../Inc/stm32f4xx_hal_conf.h
 rcac\lm75a.o: ../Inc/mxconstants.h
-rcac\lm75a.o: E:\EmbededSystemTools\keil5\ARM\ARMCC\Bin\..\include\stdint.h
+rcac\lm75a.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\stdint.h
 rcac\lm75a.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h
 rcac\lm75a.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h
 rcac\lm75a.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h

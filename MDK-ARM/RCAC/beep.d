@@ -2,7 +2,7 @@ rcac\beep.o: ..\Src\beep.c
 rcac\beep.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 rcac\beep.o: ../Inc/stm32f4xx_hal_conf.h
 rcac\beep.o: ../Inc/mxconstants.h
-rcac\beep.o: E:\EmbededSystemTools\keil5\ARM\ARMCC\Bin\..\include\stdint.h
+rcac\beep.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\stdint.h
 rcac\beep.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h
 rcac\beep.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h
 rcac\beep.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h
@@ -15,7 +15,7 @@ rcac\beep.o: ../Drivers/CMSIS/Include/core_cmSimd.h
 rcac\beep.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h
 rcac\beep.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 rcac\beep.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-rcac\beep.o: E:\EmbededSystemTools\keil5\ARM\ARMCC\Bin\..\include\stdio.h
+rcac\beep.o: D:\MKD5.21\ARM\ARMCC\Bin\..\include\stdio.h
 rcac\beep.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc_ex.h
 rcac\beep.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio.h
 rcac\beep.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio_ex.h
