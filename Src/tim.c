@@ -139,7 +139,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (tim3Counter % sampleInterval == 0)
   { 
     uint8_t newTemp = readActualTemp();
-    //printf("newtemp:%d  idleticks:0x%x  tempReadCnt:%d\n", newTemp, systemState.zlg7290KeyStates.idleTicks, systemState.tempReadCnt);
     
     /* 读取的是一个有效温度且和当前温度不同时才替换当前温度 */
     if (newTemp != 1 && newTemp)

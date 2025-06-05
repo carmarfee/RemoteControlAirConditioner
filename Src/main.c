@@ -145,15 +145,7 @@ int main(void)
     {
       systemState.zlg7290KeyStates.canRead = 0;
       I2C_ZLG7290_Read(&hi2c1, 0x71, 0x01, &systemState.zlg7290KeyStates.readBuffer, 1);
-
-      printf("0x%x\n", systemState.zlg7290KeyStates.readBuffer);
-      printf("TargetTemp:%d\n", systemState.targetTemp);
-      for (int i = 0; i < LEDBUFFER_SIZE; i++)
-        printf("%d ", systemState.ledBuffer[i]);
-      printf("\n");
-
-      printf("state:%d\n", systemState.currentState);
-
+     
       if (systemState.currentState == STATE_SLEEP)
         systemState.zlg7290KeyStates.anyBtnPressed = 1;
 
@@ -416,6 +408,7 @@ void handleStateMachine(void)
 
       updateLED();
 
+<<<<<<< HEAD
       /* �������� */
       beepOnce(BeepDelay * 10);
     }
@@ -423,6 +416,39 @@ void handleStateMachine(void)
   /* �������������� */
   default:
     break;
+=======
+        updateLED();
+      }
+      break;
+    case STATE_POWEROFF:
+      /* ִ�п����߼� */
+      if (systemState.zlg7290KeyStates.powerBtnPressed == 1)
+      {
+        systemState.zlg7290KeyStates.powerBtnPressed = 0;
+
+        /* ��ʱһ��ʱ�䣬��LM75A���ö�ȡ�¶ȵ�׼�� */
+        HAL_Delay(100);
+
+        /* ����currentStateΪNORMAL ֮�����ͨ��TIM3�жϴ�LM75A��ȡ�¶� */
+        systemState.currentState = STATE_NORMAL;
+        
+        while (1)
+        {
+          /* ����ѭ��ֱ��actualTemp��һ����Ч�¶� */
+          if (systemState.actualTemp != 1)
+            break;
+        }
+
+        updateLED();
+                
+        /* �������� */
+        beepOnce(BeepDelay * 10);
+      }
+      break;
+    /* �������������� */
+    default:
+      break;
+>>>>>>> 03a391efac33e6481148cf9fe556a78aba35a843
   }
 }
 
