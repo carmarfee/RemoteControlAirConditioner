@@ -111,7 +111,6 @@ int main(void)
   LM75SetMode(CONF_ADDR, NORMOR_MODE);
   HAL_TIM_Base_Start_IT(&htim3);
   initMarquee();
-  printf("cold\n");
   }
   else
   {
@@ -137,7 +136,6 @@ int main(void)
   LM75SetMode(CONF_ADDR, NORMOR_MODE);
   HAL_TIM_Base_Start_IT(&htim3);
   initMarquee();
-    printf("hot\n");
   }
   /* USER CODE END 2 */
 
@@ -154,14 +152,6 @@ int main(void)
       /* 重置读取标志，读键值 */
       systemState.zlg7290KeyStates.canRead = 0;
       I2C_ZLG7290_Read(&hi2c1, 0x71, 0x01, &systemState.zlg7290KeyStates.readBuffer, 1);
-
-      printf("0x%x\n", systemState.zlg7290KeyStates.readBuffer);
-      printf("TargetTemp:%d\n", systemState.targetTemp);
-      for (int i = 0; i < LEDBUFFER_SIZE; i++)
-        printf("%d ", systemState.ledBuffer[i]);
-      printf("\n");
-
-      printf("state:%d\n", systemState.currentState);
      
       if (systemState.currentState == STATE_SLEEP)
         systemState.zlg7290KeyStates.anyBtnPressed = 1;
@@ -430,9 +420,6 @@ void handleStateMachine(void)
         /* 设置currentState为NORMAL 之后可以通过TIM3中断从LM75A读取温度 */
         systemState.currentState = STATE_NORMAL;
         
-        //systemState.actualTemp = getActualTemp();
-
-        printf("actualTemp=%d\n", systemState.actualTemp);
         while (1)
         {
           /* 无限循环直到actualTemp是一个有效温度 */
