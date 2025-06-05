@@ -44,8 +44,10 @@
 #include "Dc_motor.h"
 #include "beep.h"
 // #include "check.h"
+#include "sysSecurity.h"
 #include "mxconstants.h"
 #include "led.h"
+#include "key.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -83,52 +85,38 @@ void initMarquee(void);
 
 int main(void)
 {
+  /* USER CODE END 1 */
+
+  /* MCU Configuration----------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
+
+  /* Configure the system clock */
+  SystemClock_Config();
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_I2C1_Init();
+  MX_USART1_UART_Init();
+  MX_TIM3_Init();
+  MX_IWDG_Init();
+  LM75SetMode(CONF_ADDR, NORMOR_MODE);
+  HAL_TIM_Base_Start_IT(&htim3);
+  initMarquee();
+  /* USER CODE BEGIN 2 */
 
   /* USER CODE BEGIN 1 */
   if (unStartFlag != MagicNumber)
   {
     unStartFlag = MagicNumber; /* 设置MagicNumber，表示冷启动 */
-    /* USER CODE END 1 */
 
-    /* MCU Configuration----------------------------------------------------------*/
-
-    /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-    HAL_Init();
-
-    /* Configure the system clock */
-    SystemClock_Config();
-    /* Initialize all configured peripherals */
-    MX_GPIO_Init();
-    MX_I2C1_Init();
-    MX_USART1_UART_Init();
-    MX_TIM3_Init();
-    MX_IWDG_Init();
-
-    /* USER CODE BEGIN 2 */
     initSystemState();
-    LM75SetMode(CONF_ADDR, NORMOR_MODE);
-    HAL_TIM_Base_Start_IT(&htim3);
-    initMarquee();
     printf("cold start\n");
   }
   else
   {
-    HAL_Init();
-
-    /* Configure the system clock */
-    SystemClock_Config();
-    /* Initialize all configured peripherals */
-    MX_GPIO_Init();
-    MX_I2C1_Init();
-    MX_USART1_UART_Init();
-    MX_TIM3_Init();
-    MX_IWDG_Init();
-
     /* USER CODE BEGIN 2 */
-    initSystemState();
-    LM75SetMode(CONF_ADDR, NORMOR_MODE);
-    HAL_TIM_Base_Start_IT(&htim3);
-    initMarquee();
+    loadSystemState();
     printf("hot start\n");
   }
   // }
@@ -144,8 +132,6 @@ int main(void)
     if (systemState.zlg7290KeyStates.canRead == 1)
     {
       systemState.zlg7290KeyStates.canRead = 0;
-      I2C_ZLG7290_Read(&hi2c1, 0x71, 0x01, &systemState.zlg7290KeyStates.readBuffer, 1);
-     
       if (systemState.currentState == STATE_SLEEP)
         systemState.zlg7290KeyStates.anyBtnPressed = 1;
 
@@ -232,20 +218,36 @@ int fputc(int ch, FILE *f)
 /* ϵͳʱ���ж� */
 void HAL_SYSTICK_Callback(void)
 {
+  systemState.refreshTicks++;
   /* ������ܵ�ǰ����״̬ΪNormal���޲���ʱ��δ������ֵ�����ۼ��޲���ʱ�� */
   if (systemState.currentState == STATE_NORMAL && systemState.zlg7290KeyStates.idleTicks < ZLG7290MaxIdleTicks)
+  {
     systemState.zlg7290KeyStates.idleTicks++;
+    saveSystemState();
+  }
+  else
+  {
+    systemState.zlg7290KeyStates.idleTicks = 0;
+    systemState.currentState = STATE_SLEEP;
+  }
+  if (systemState.refreshTicks < REFRESH_INTERVAL)
+  {
+    systemState.refreshTicks = 0;
+    handleStateMachine();
+  }
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   /* ���յ�EXTI13ʱ������zlg7290������ȡ��־ */
   if (GPIO_Pin == GPIO_PIN_13)
-    systemState.zlg7290KeyStates.canRead = 1;
+    is_pressed = 1;
 }
 
 void initSystemState(void)
 {
+  systemState.refreshTicks = 0;
+
   systemState.zlg7290KeyStates.readBuffer = 0;      /* ZLG7290��ֵ������ */
   systemState.zlg7290KeyStates.canRead = 0;         /* ZLG7290�Ƿ�ɶ���־ */
   systemState.zlg7290KeyStates.idleTicks = 0;       /* ZLG7290����δ������ʱ���ۼ��� */
@@ -396,9 +398,6 @@ void handleStateMachine(void)
       /* ����currentStateΪNORMAL ֮�����ͨ��TIM3�жϴ�LM75A��ȡ�¶� */
       systemState.currentState = STATE_NORMAL;
 
-      // systemState.actualTemp = getActualTemp();
-
-      printf("actualTemp=%d\n", systemState.actualTemp);
       while (1)
       {
         /* ����ѭ��ֱ��actualTemp��һ����Ч�¶� */
@@ -408,7 +407,6 @@ void handleStateMachine(void)
 
       updateLED();
 
-<<<<<<< HEAD
       /* �������� */
       beepOnce(BeepDelay * 10);
     }
@@ -416,39 +414,6 @@ void handleStateMachine(void)
   /* �������������� */
   default:
     break;
-=======
-        updateLED();
-      }
-      break;
-    case STATE_POWEROFF:
-      /* ִ�п����߼� */
-      if (systemState.zlg7290KeyStates.powerBtnPressed == 1)
-      {
-        systemState.zlg7290KeyStates.powerBtnPressed = 0;
-
-        /* ��ʱһ��ʱ�䣬��LM75A���ö�ȡ�¶ȵ�׼�� */
-        HAL_Delay(100);
-
-        /* ����currentStateΪNORMAL ֮�����ͨ��TIM3�жϴ�LM75A��ȡ�¶� */
-        systemState.currentState = STATE_NORMAL;
-        
-        while (1)
-        {
-          /* ����ѭ��ֱ��actualTemp��һ����Ч�¶� */
-          if (systemState.actualTemp != 1)
-            break;
-        }
-
-        updateLED();
-                
-        /* �������� */
-        beepOnce(BeepDelay * 10);
-      }
-      break;
-    /* �������������� */
-    default:
-      break;
->>>>>>> 03a391efac33e6481148cf9fe556a78aba35a843
   }
 }
 

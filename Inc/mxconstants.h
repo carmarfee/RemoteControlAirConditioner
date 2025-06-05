@@ -88,6 +88,8 @@ struct FanStates
 
 typedef struct
 {
+  uint8_t refreshTicks;
+
   struct ZLG7290KeyStates zlg7290KeyStates;
   struct FanStates fanStates;
   
@@ -103,7 +105,6 @@ typedef struct
   uint16_t tempSum;
   uint8_t tempBufferIndex;
   uint8_t tempReadCnt;
-  
 }SystemStateBlock;
 
 extern SystemStateBlock systemState;
