@@ -79,9 +79,7 @@ uint8_t getActualTemp()
 {
 	uint16_t newTemp = LM75GetTempReg();
 	if (newTemp == 1)
-	{
 		return 1;
-	}
 
 	if (newTemp & (0x01 << 16))
 	{
@@ -113,6 +111,7 @@ uint8_t readActualTemp(void)
 
 		if (systemState.tempReadCnt < TEMPBUFFER_SIZE - 1)
 		{
+			/* 缓冲区未填满时直接返回读取的温度 */
 			systemState.tempReadCnt++;
 			return newTemp;
 		}
@@ -122,10 +121,7 @@ uint8_t readActualTemp(void)
 		return 1;
 	}
 
-	/* 前9次调用直接返回1 */
-
-
-	/* 第10次及之后调用执行以下逻辑，此时缓冲区已填满 */
+	/* 缓冲区填满之后执行以下逻辑 */
 	
 	/* 计算去极值平均值 */
 	uint8_t min = 0xFF;

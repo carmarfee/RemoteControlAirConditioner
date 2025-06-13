@@ -1,35 +1,35 @@
 /**
-  ******************************************************************************
-  * File Name          : main.c
-  * Description        : Main program body
-  ******************************************************************************
-  *
-  * COPYRIGHT(c) 2025 STMicroelectronics
-  *
-  * Redistribution and use in source and binary forms, with or without modification,
-  * are permitted provided that the following conditions are met:
-  *   1. Redistributions of source code must retain the above copyright notice,
-  *      this list of conditions and the following disclaimer.
-  *   2. Redistributions in binary form must reproduce the above copyright notice,
-  *      this list of conditions and the following disclaimer in the documentation
-  *      and/or other materials provided with the distribution.
-  *   3. Neither the name of STMicroelectronics nor the names of its contributors
-  *      may be used to endorse or promote products derived from this software
-  *      without specific prior written permission.
-  *
-  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * File Name          : main.c
+ * Description        : Main program body
+ ******************************************************************************
+ *
+ * COPYRIGHT(c) 2025 STMicroelectronics
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *   1. Redistributions of source code must retain the above copyright notice,
+ *      this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright notice,
+ *      this list of conditions and the following disclaimer in the documentation
+ *      and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its contributors
+ *      may be used to endorse or promote products derived from this software
+ *      without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ ******************************************************************************
+ */
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 #include "i2c.h"
@@ -37,6 +37,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "sysSecurity.h"
 
 /* USER CODE BEGIN Includes */
 #include "zlg7290.h"
@@ -46,6 +47,7 @@
 // #include "check.h"
 #include "mxconstants.h"
 #include "led.h"
+#include "key.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -54,12 +56,17 @@
 /* Private variables ---------------------------------------------------------*/
 SystemStateBlock systemState;
 
+// NVMSystemStateRecord systemStateRecord = {
+//     .state_data = &systemState,
+//     .checksum = 0};
+
 // uint32_t unStartFlag __at (0x40003FF4); /* 热启动MagicNumber保存位置 */
 
 uint8_t Buffer_DC[2] = {0x00, 0xff};
 
-volatile uint32_t *unStartFlag = (volatile uint32_t *)0x10000000;
-
+static uint32_t unStartFlag __attribute__((at(0x20003FF0), zero_init));
+NVMSystemStateRecord backupState0 __attribute__((at(0x20004000), zero_init));
+NVMSystemStateRecord backupState1 __attribute__((at(0x20005000), zero_init));
 
 /* USER CODE END PV */
 
@@ -73,6 +80,7 @@ int fputc(int ch, FILE *f);
 void handleKey(void);
 void initSystemState(void);
 void handleStateMachine(void);
+void initDCMotor(void);
 void handleDCMotor(void);
 void handleMarquee(void);
 void turnOffMarquee(void);
@@ -84,77 +92,63 @@ void initMarquee(void);
 
 int main(void)
 {
-
-  /* USER CODE BEGIN 1 */
-  if (*unStartFlag != MagicNumber) /* 如果是第一次启动 */
-  {
-    *unStartFlag = MagicNumber;
-  /* USER CODE END 1 */
-
-  /* MCU Configuration----------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
   /* Configure the system clock */
   SystemClock_Config();
-
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_USART1_UART_Init();
   MX_TIM3_Init();
-  MX_IWDG_Init();
+  MX_IWDG_Init(); // 启用独立看门狗
 
   /* USER CODE BEGIN 2 */
-  initSystemState();
   LM75SetMode(CONF_ADDR, NORMOR_MODE);
   HAL_TIM_Base_Start_IT(&htim3);
   initMarquee();
+
+  /* USER CODE BEGIN 1 */
+  if (unStartFlag != MagicNumber)
+  {
+    unStartFlag = MagicNumber; /* 设置MagicNumber，表示冷启动 */
+    /* USER CODE END 1 */
+
+    /* MCU Configuration----------------------------------------------------------*/
+
+    /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+
+    initSystemState();
+		
   }
   else
   {
-      /* USER CODE END 1 */
-
-  /* MCU Configuration----------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
-
-  /* Configure the system clock */
-  SystemClock_Config();
-
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_I2C1_Init();
-  MX_USART1_UART_Init();
-  MX_TIM3_Init();
-  MX_IWDG_Init();
-
-  /* USER CODE BEGIN 2 */
-  initSystemState();
-  LM75SetMode(CONF_ADDR, NORMOR_MODE);
-  HAL_TIM_Base_Start_IT(&htim3);
-  initMarquee();
+    loadSystemState();
   }
-  /* USER CODE END 2 */
+
+  uint8_t seq[4] = {0};    // 序列检测数组
+  uint8_t random_path = 0; // 随机路径选择
 
   /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
   while (1)
   {
-  /* USER CODE END WHILE */
+    // 序列数组清零
+    for (int i = 0; i < 4; i++)
+      seq[i] = 0;
 
-  /* USER CODE BEGIN 3 */
-    /* 执行读键值逻辑 */
+    // 随机选择执行路径
+    random_path = rand() % 2;
+
     if (systemState.zlg7290KeyStates.canRead == 1)
     {
       /* 重置读取标志，读键值 */
+
       systemState.zlg7290KeyStates.canRead = 0;
       I2C_ZLG7290_Read(&hi2c1, 0x71, 0x01, &systemState.zlg7290KeyStates.readBuffer, 1);
-     
+
+      /* 清理按键标志 */
       if (systemState.currentState == STATE_SLEEP)
-        systemState.zlg7290KeyStates.anyBtnPressed = 1;
+        systemState.zlg7290KeyStates.anyBtnPressed = 0;
 
       /* 成功读取键值，重置无操作时间，触发蜂鸣器响应 */
       if (systemState.currentState == STATE_NORMAL)
@@ -170,31 +164,72 @@ int main(void)
       systemState.zlg7290KeyStates.readBuffer = 0;
     }
 
-    /* 执行状态切换逻辑 */
-    handleStateMachine();
+    // 乱序执行分支A
+    if (random_path == 0)
+    {
+      seq[0] = 1; // 步骤1: 状态检测
 
-    refreshLED();      
-    
-    /* 执行驱动直流电机逻辑 */
-    if (systemState.currentState != STATE_POWEROFF) 
-      handleDCMotor();
+      if (seq[0] == 1)
+      {
+        handleStateMachine();
+        saveSystemState();
 
-    /* 更新Marquee */
+        seq[1] = 2; // 步骤2: 状态机处理
+      }
+
+      if (seq[0] == 1 && seq[1] == 2)
+      {
+        refreshLED();
+        seq[2] = 3; // 步骤3: LED刷新
+      }
+
+      if (seq[0] == 1 && seq[1] == 2 && seq[2] == 3)
+      {
+        if (systemState.currentState != STATE_POWEROFF)
+          handleDCMotor();
+        seq[3] = 4; // 步骤4: 电机控制
+      }
+    }
+    // 乱序执行分支B
+    else
+    {
+      seq[0] = 1; // 步骤1: 状态检测
+
+      if (seq[0] == 1)
+      {
+        if (systemState.currentState != STATE_POWEROFF)
+          handleDCMotor();
+        seq[1] = 4; // 步骤4: 电机控制
+      }
+
+      if (seq[0] == 1 && seq[1] == 4)
+      {
+        handleStateMachine();
+        saveSystemState();
+
+        seq[2] = 2; // 步骤2: 状态机处理
+      }
+
+      if (seq[0] == 1 && seq[1] == 4 && seq[2] == 2)
+      {
+        refreshLED();
+        seq[3] = 3; // 步骤3: LED刷新
+      }
+    }
+
+    // 始终执行的功能
     if (systemState.currentState == STATE_NORMAL)
       handleMarquee();
 
-    /* 喂狗 */
+    // 喂狗操作
     MX_IWDG_Refresh();
-      
-    /* 延时一段时间，防止总线阻塞 */
+
     HAL_Delay(100);
   }
-  /* USER CODE END 3 */
-
 }
 
 /** System Clock Configuration
-*/
+ */
 void SystemClock_Config(void)
 {
 
@@ -205,7 +240,7 @@ void SystemClock_Config(void)
 
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI | RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
@@ -219,8 +254,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
@@ -230,7 +264,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/10000);
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 10000);
 
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
@@ -253,6 +287,8 @@ void HAL_SYSTICK_Callback(void)
   /* 若数码管当前工作状态为Normal且无操作时间未超过阈值，则累加无操作时间 */
   if (systemState.currentState == STATE_NORMAL && systemState.zlg7290KeyStates.idleTicks < ZLG7290MaxIdleTicks)
     systemState.zlg7290KeyStates.idleTicks++;
+  if (systemState.zlg7290KeyStates.idleTicks > 800)
+    saveSystemState();
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
@@ -264,11 +300,27 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 void initSystemState(void)
 {
-  systemState.zlg7290KeyStates.readBuffer = 0; /* ZLG7290键值缓冲区 */
-  systemState.zlg7290KeyStates.canRead = 0; /* ZLG7290是否可读标志 */
-  systemState.zlg7290KeyStates.idleTicks = 0; /* ZLG7290按键未被按下时间累加器 */
+  systemState.zlg7290KeyStates.readBuffer = 0;      /* ZLG7290键值缓冲区 */
+  systemState.zlg7290KeyStates.canRead = 0;         /* ZLG7290是否可读标志 */
+  systemState.zlg7290KeyStates.idleTicks = 0;       /* ZLG7290按键未被按下时间累加器 */
   systemState.zlg7290KeyStates.powerBtnPressed = 0; /* 通电时工作状态为PowerOff */
-  systemState.zlg7290KeyStates.anyBtnPressed = 0; /* 任意按钮被按下标志 */
+  systemState.zlg7290KeyStates.anyBtnPressed = 0;   /* 任意按钮被按下标志 */
+  systemState.zlg7290KeyStates.invoked = 0;         /* ZLG7290中断发生标志 */
+
+  /* 按键A */
+  systemState.zlg7290KeyStates.zlg7290KeyDebounce[0].keyCode = 0x19;
+  systemState.zlg7290KeyStates.zlg7290KeyDebounce[0].keyState = KEY_IDLE;
+  systemState.zlg7290KeyStates.zlg7290KeyDebounce[0].judgeTimes = 0;
+
+  /* 按键B */
+  systemState.zlg7290KeyStates.zlg7290KeyDebounce[1].keyCode = 0x11;
+  systemState.zlg7290KeyStates.zlg7290KeyDebounce[1].keyState = KEY_IDLE;
+  systemState.zlg7290KeyStates.zlg7290KeyDebounce[1].judgeTimes = 0;
+
+  /* 按键C */
+  systemState.zlg7290KeyStates.zlg7290KeyDebounce[2].keyCode = 0x01;
+  systemState.zlg7290KeyStates.zlg7290KeyDebounce[2].keyState = KEY_IDLE;
+  systemState.zlg7290KeyStates.zlg7290KeyDebounce[2].judgeTimes = 0;
 
   systemState.fanStates.targetSpeedLevel = SPEED_LEVEL_1; /* 默认风扇转速为1档 */
   systemState.fanStates.currentSpeedLevel = SPEED_LEVEL_0;
@@ -276,7 +328,7 @@ void initSystemState(void)
   systemState.currentMarqueeState = MARQUEE_OFF;
   systemState.currentState = STATE_POWEROFF; /* 通电时工作状态为PowerOff */
 
-  systemState.actualTemp = 1; /* 实际温度 */
+  systemState.actualTemp = 1;                 /* 实际温度 */
   systemState.targetTemp = DefaultTargetTemp; /* 目标温度 */
 
   for (int i = 0; i < LEDBUFFER_SIZE; i++)
@@ -284,51 +336,53 @@ void initSystemState(void)
 
   for (int i = 0; i < TEMPBUFFER_SIZE; i++)
     systemState.tempBuffer[i] = 0;
-  
+
   systemState.tempSum = 0;
   systemState.tempBufferIndex = 0;
   systemState.tempReadCnt = 0;
+
+  // systemStateRecord.checksum = crc16((uint8_t *)systemStateRecord.state_data, sizeof(SystemStateBlock)); /* 校验和 */
 }
 
 void handleKey(void)
 {
   switch (systemState.zlg7290KeyStates.readBuffer)
   {
-    /* 按键A：(Normal | Sleep有效)使targetTemp增加1，上限30 */
-    case 0x19:
-      if (systemState.currentState == STATE_NORMAL || systemState.currentState == STATE_SLEEP)
+  /* 按键A：(Normal | Sleep有效)使targetTemp增加1，上限30 */
+  case 0x19:
+    if (systemState.currentState == STATE_NORMAL || systemState.currentState == STATE_SLEEP)
+    {
+      if (systemState.targetTemp < 30)
       {
-        if (systemState.targetTemp < 30)
-        {
-          systemState.targetTemp++;
-          updateLED();
-        }
+        systemState.targetTemp++;
+        updateLED();
       }
-      break;
-    /* 按键B：(Normal | Sleep有效)使targetTemp减少1，下限16 */
-    case 0x11:
-      if (systemState.currentState == STATE_NORMAL || systemState.currentState == STATE_SLEEP)
+    }
+    break;
+  /* 按键B：(Normal | Sleep有效)使targetTemp减少1，下限16 */
+  case 0x11:
+    if (systemState.currentState == STATE_NORMAL || systemState.currentState == STATE_SLEEP)
+    {
+      if (systemState.targetTemp > 16)
       {
-        if (systemState.targetTemp > 16)
-        {
-          systemState.targetTemp--;
-          updateLED();
-        }
+        systemState.targetTemp--;
+        updateLED();
       }
-      break;
-    /* 按键D：(始终有效)power按钮，进行Normal/Sleep和PowerOff之间的状态切换 */
-    case 0x01:
-      systemState.zlg7290KeyStates.powerBtnPressed = 1;
-      break;
-    /* 其他按键：无操作 */
-    default:
-      break;
+    }
+    break;
+  /* 按键D：(始终有效)power按钮，进行Normal/Sleep和PowerOff之间的状态切换 */
+  case 0x01:
+    systemState.zlg7290KeyStates.powerBtnPressed = 1;
+    break;
+  /* 其他按键：无操作 */
+  default:
+    break;
   }
 }
 
 void handleStateMachine(void)
 {
-  /* 
+  /*
    * 在Normal和Sleep模式下，存在开机/关机和Normal/Sleep两种状态转换
    * 处理优先级: 开机/关机状态转换 > Normal/Sleep状态转换
    * 并且处理开机/关机后，不再处理Normal/Sleep
@@ -336,107 +390,119 @@ void handleStateMachine(void)
    */
   switch (systemState.currentState)
   {
-    case STATE_NORMAL:
-      /* 执行关机逻辑 */
-      if (systemState.zlg7290KeyStates.powerBtnPressed == 1)
+  case STATE_NORMAL:
+    /* 执行关机逻辑 */
+    if (systemState.zlg7290KeyStates.powerBtnPressed == 1)
+    {
+      systemState.zlg7290KeyStates.powerBtnPressed = 0;
+
+      /* 设置工作状态为PowerOff，不再从LM75A读取温度 */
+      systemState.currentState = STATE_POWEROFF;
+
+      /* 熄灭数码管 */
+      turnOffLED();
+
+      /* 关闭风扇(若本关闭，则不操作) */
+      if (systemState.fanStates.currentSpeedLevel != SPEED_LEVEL_0)
       {
-        systemState.zlg7290KeyStates.powerBtnPressed = 0;
-
-        /* 设置工作状态为PowerOff，不再从LM75A读取温度 */
-        systemState.currentState = STATE_POWEROFF;
-
-        /* 熄灭数码管 */
-        turnOffLED();
-
-        /* 关闭风扇(若本关闭，则不操作) */
-        if (systemState.fanStates.currentSpeedLevel != SPEED_LEVEL_0)
-        {
-          /* 停转 */
-          DC_Motor_Pin_Low();
-          I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, 0x00, &Buffer_DC[0], 1);
-          systemState.fanStates.currentSpeedLevel = SPEED_LEVEL_0;
-        }
-
-        /* 关闭Marquee */
-        turnOffMarquee();
+        /* 停转 */
+        DC_Motor_Pin_Low();
+        I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, 0x00, &Buffer_DC[0], 1);
+        systemState.fanStates.currentSpeedLevel = SPEED_LEVEL_0;
       }
-      /* 执行转换到Sleep状态逻辑 */
-      else if (systemState.zlg7290KeyStates.idleTicks >= ZLG7290MaxIdleTicks)
+
+      /* 关闭Marquee */
+      turnOffMarquee();
+    }
+    /* 执行转换到Sleep状态逻辑 */
+    else if (systemState.zlg7290KeyStates.idleTicks >= ZLG7290MaxIdleTicks)
+    {
+      systemState.zlg7290KeyStates.idleTicks = 0;
+
+      /* 设置工作模式为SLEEP，之后TIM3中断读取温度不再点亮LED */
+      systemState.currentState = STATE_SLEEP;
+
+      /* 熄灭8段7位数码管 */
+      turnOffLED();
+
+      /* 关闭Marquee */
+      turnOffMarquee();
+			
+    }
+    break;
+  case STATE_SLEEP:
+    /* 执行关机逻辑 */
+    if (systemState.zlg7290KeyStates.powerBtnPressed == 1)
+    {
+      systemState.zlg7290KeyStates.powerBtnPressed = 0;
+      systemState.zlg7290KeyStates.anyBtnPressed = 0;
+
+      /* 设置工作状态为PowerOff，不再从LM75A读取温度 */
+      systemState.currentState = STATE_POWEROFF;
+
+      /* 关闭风扇(若本关闭，则不操作) */
+      if (systemState.fanStates.currentSpeedLevel != SPEED_LEVEL_0)
       {
-        systemState.zlg7290KeyStates.idleTicks = 0;
-
-        /* 设置工作模式为SLEEP，之后TIM3中断读取温度不再点亮LED */
-        systemState.currentState = STATE_SLEEP;
-        
-        /* 熄灭8段7位数码管 */
-        turnOffLED();
-
-        /* 关闭Marquee */
-        turnOffMarquee();
+        /* 停转 */
+        DC_Motor_Pin_Low();
+        I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, 0x00, &Buffer_DC[0], 1);
+        systemState.fanStates.currentSpeedLevel = SPEED_LEVEL_0;
       }
-      break;
-    case STATE_SLEEP:
-      /* 执行关机逻辑 */
-      if (systemState.zlg7290KeyStates.powerBtnPressed == 1)
+
+      /* 关闭Marquee */
+      turnOffMarquee();
+			
+			/* ??????? */
+			htim3.Init.Period = 20000;
+			if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+				Error_Handler();
+    }
+    /* 执行转换到Normal状态逻辑 */
+    else if (systemState.zlg7290KeyStates.anyBtnPressed == 1)
+    {
+      systemState.zlg7290KeyStates.anyBtnPressed = 0;
+
+      /* 设置工作模式为NORMAL，之后TIM3中断读取温度将点亮LED */
+      systemState.currentState = STATE_NORMAL;
+
+      updateLED();
+    }
+    break;
+  case STATE_POWEROFF:
+    /* 执行开机逻辑 */
+    if (systemState.zlg7290KeyStates.powerBtnPressed == 1)
+    {
+      systemState.zlg7290KeyStates.powerBtnPressed = 0;
+
+      /* 延时一段时间，让LM75A做好读取温度的准备 */
+      HAL_Delay(100);
+
+      /* 设置currentState为NORMAL 之后可以通过TIM3中断从LM75A读取温度 */
+      systemState.currentState = STATE_NORMAL;
+
+      while (1)
       {
-        systemState.zlg7290KeyStates.powerBtnPressed = 0;
-        systemState.zlg7290KeyStates.anyBtnPressed = 0;
-
-        /* 设置工作状态为PowerOff，不再从LM75A读取温度 */
-        systemState.currentState = STATE_POWEROFF;
-
-        /* 关闭风扇(若本关闭，则不操作) */
-        if (systemState.fanStates.currentSpeedLevel != SPEED_LEVEL_0)
-        {
-          /* 停转 */
-          DC_Motor_Pin_Low();
-          I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, 0x00, &Buffer_DC[0], 1);
-          systemState.fanStates.currentSpeedLevel = SPEED_LEVEL_0;
-        }
-
-        /* 关闭Marquee */
-        turnOffMarquee();
+        /* 无限循环直到actualTemp是一个有效温度 */
+        if (systemState.actualTemp != 1)
+          break;
       }
-      /* 执行转换到Normal状态逻辑 */
-      else if (systemState.zlg7290KeyStates.anyBtnPressed == 1)
-      {
-        systemState.zlg7290KeyStates.anyBtnPressed = 0;
 
-        /* 设置工作模式为NORMAL，之后TIM3中断读取温度将点亮LED */
-        systemState.currentState = STATE_NORMAL;
+      updateLED();
 
-        updateLED();
-      }
-      break;
-    case STATE_POWEROFF:
-      /* 执行开机逻辑 */
-      if (systemState.zlg7290KeyStates.powerBtnPressed == 1)
-      {
-        systemState.zlg7290KeyStates.powerBtnPressed = 0;
-
-        /* 延时一段时间，让LM75A做好读取温度的准备 */
-        HAL_Delay(100);
-
-        /* 设置currentState为NORMAL 之后可以通过TIM3中断从LM75A读取温度 */
-        systemState.currentState = STATE_NORMAL;
-        
-        while (1)
-        {
-          /* 无限循环直到actualTemp是一个有效温度 */
-          if (systemState.actualTemp != 1)
-            break;
-        }
-
-        updateLED();
-                
-        /* 蜂鸣器响 */
-        beepOnce(BeepDelay * 10);
-      }
-      break;
-    /* 不会出现这种情况 */
-    default:
-      break;
+      /* 蜂鸣器响 */
+      beepOnce(BeepDelay * 10);
+    }
+    break;
+  /* 不会出现这种情况 */
+  default:
+    break;
   }
+}
+
+void initDCMotor(void)
+{
+  DC_Motor_Pin_Low();
+  I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, 0x00, &Buffer_DC[0], 1);
 }
 
 void handleDCMotor(void)
@@ -459,21 +525,21 @@ void handleDCMotor(void)
       DC_Motor_Pin_High();
       switch (systemState.fanStates.targetSpeedLevel)
       {
-        /* 正向转速1 */
-        case SPEED_LEVEL_1:
-          I2C_DC_Motor_Write(&hi2c1,DC_Motor_Addr,0x0A,&Buffer_DC[1],1);
-          break;
-        /* 正向转速2 */
-        case SPEED_LEVEL_2:
-          I2C_DC_Motor_Write(&hi2c1,DC_Motor_Addr,0x05,&Buffer_DC[1],1);
-          break;
-        /* 正向转速3 */
-        case SPEED_LEVEL_3:
-          I2C_DC_Motor_Write(&hi2c1,DC_Motor_Addr,0x03,&Buffer_DC[1],1);
-          break;
-        /* 不会出现这种情况 */
-        default:
-          break;
+      /* 正向转速1 */
+      case SPEED_LEVEL_1:
+        I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, 0x0A, &Buffer_DC[1], 1);
+        break;
+      /* 正向转速2 */
+      case SPEED_LEVEL_2:
+        I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, 0x05, &Buffer_DC[1], 1);
+        break;
+      /* 正向转速3 */
+      case SPEED_LEVEL_3:
+        I2C_DC_Motor_Write(&hi2c1, DC_Motor_Addr, 0x03, &Buffer_DC[1], 1);
+        break;
+      /* 不会出现这种情况 */
+      default:
+        break;
       }
       /* 设置当前转速为目标转速 */
       systemState.fanStates.currentSpeedLevel = systemState.fanStates.targetSpeedLevel;
@@ -507,29 +573,29 @@ void handleMarquee(void)
   /* 根据风速点亮对应Marquee */
   switch (systemState.fanStates.currentSpeedLevel)
   {
-    /* 点亮D1 */
-    case SPEED_LEVEL_0:
-      HAL_GPIO_WritePin(GPIOF,GPIO_PIN_10,GPIO_PIN_RESET);
-      systemState.currentMarqueeState = MARQUEE_D1;
-      break;
-    /* 点亮D2 */
-    case SPEED_LEVEL_1:
-      HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_RESET);
-      systemState.currentMarqueeState = MARQUEE_D2;
-      break;
-    /* 点亮D3 */
-    case SPEED_LEVEL_2:
-      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_15,GPIO_PIN_RESET);
-      systemState.currentMarqueeState = MARQUEE_D3;
-      break;
-    /* 点亮D4 */
-    case SPEED_LEVEL_3:
-      HAL_GPIO_WritePin(GPIOH,GPIO_PIN_15,GPIO_PIN_RESET);
-      systemState.currentMarqueeState = MARQUEE_D4;
-      break;
-    /* 不会出现这种情况 */
-    default:
-      break;
+  /* 点亮D1 */
+  case SPEED_LEVEL_0:
+    HAL_GPIO_WritePin(GPIOF, GPIO_PIN_10, GPIO_PIN_RESET);
+    systemState.currentMarqueeState = MARQUEE_D1;
+    break;
+  /* 点亮D2 */
+  case SPEED_LEVEL_1:
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
+    systemState.currentMarqueeState = MARQUEE_D2;
+    break;
+  /* 点亮D3 */
+  case SPEED_LEVEL_2:
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
+    systemState.currentMarqueeState = MARQUEE_D3;
+    break;
+  /* 点亮D4 */
+  case SPEED_LEVEL_3:
+    HAL_GPIO_WritePin(GPIOH, GPIO_PIN_15, GPIO_PIN_RESET);
+    systemState.currentMarqueeState = MARQUEE_D4;
+    break;
+  /* 不会出现这种情况 */
+  default:
+    break;
   }
 }
 
@@ -538,25 +604,25 @@ void turnOffMarquee(void)
 {
   switch (systemState.currentMarqueeState)
   {
-    /* 熄灭D1 */
-    case MARQUEE_D1:
-      HAL_GPIO_WritePin(GPIOF,GPIO_PIN_10,GPIO_PIN_SET);
-      break;
-    /* 熄灭D2 */
-    case MARQUEE_D2:
-      HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_SET);
-      break;
-    /* 熄灭D3 */
-    case MARQUEE_D3:
-      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_15,GPIO_PIN_SET);
-      break;
-    /* 熄灭D4 */
-    case MARQUEE_D4:
-      HAL_GPIO_WritePin(GPIOH,GPIO_PIN_15,GPIO_PIN_SET);
-      break;
-    /* 如果全部关闭，则不操作 */
-    default:
-      break;
+  /* 熄灭D1 */
+  case MARQUEE_D1:
+    HAL_GPIO_WritePin(GPIOF, GPIO_PIN_10, GPIO_PIN_SET);
+    break;
+  /* 熄灭D2 */
+  case MARQUEE_D2:
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
+    break;
+  /* 熄灭D3 */
+  case MARQUEE_D3:
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
+    break;
+  /* 熄灭D4 */
+  case MARQUEE_D4:
+    HAL_GPIO_WritePin(GPIOH, GPIO_PIN_15, GPIO_PIN_SET);
+    break;
+  /* 如果全部关闭，则不操作 */
+  default:
+    break;
   }
 
   systemState.currentMarqueeState = MARQUEE_OFF;
@@ -564,20 +630,20 @@ void turnOffMarquee(void)
 
 void initMarquee(void)
 {
-  HAL_GPIO_WritePin(GPIOF,GPIO_PIN_10,GPIO_PIN_SET);
-  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_SET);
-  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_15,GPIO_PIN_SET);
-  HAL_GPIO_WritePin(GPIOH,GPIO_PIN_15,GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_10, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOH, GPIO_PIN_15, GPIO_PIN_SET);
   systemState.currentMarqueeState = MARQUEE_OFF;
 }
 
 /* USER CODE END 4 */
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @param  None
-  * @retval None
-  */
+ * @brief  This function is executed in case of error occurrence.
+ * @param  None
+ * @retval None
+ */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler */
@@ -585,35 +651,34 @@ void Error_Handler(void)
   while (1)
   {
   }
-  /* USER CODE END Error_Handler */ 
+  /* USER CODE END Error_Handler */
 }
 
 #ifdef USE_FULL_ASSERT
 
 /**
-   * @brief Reports the name of the source file and the source line number
-   * where the assert_param error has occurred.
-   * @param file: pointer to the source file name
-   * @param line: assert_param error line source number
-   * @retval None
-   */
-void assert_failed(uint8_t* file, uint32_t line)
+ * @brief Reports the name of the source file and the source line number
+ * where the assert_param error has occurred.
+ * @param file: pointer to the source file name
+ * @param line: assert_param error line source number
+ * @retval None
+ */
+void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
-
 }
 
 #endif
 
 /**
-  * @}
-  */ 
+ * @}
+ */
 
 /**
-  * @}
-*/ 
+ * @}
+ */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

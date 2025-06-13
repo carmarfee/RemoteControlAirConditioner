@@ -5,11 +5,11 @@
 <h2>Tool Versions:</h2>
 IDE-Version: ¦ÌVision V5.21.1.0
 Copyright (C) 2016 ARM Ltd and ARM Germany GmbH. All rights reserved.
-License Information: Ta Ze, Personal, LIC=----
+License Information: mark carmarfee, whu, LIC=----
  
 Tool Versions:
 Toolchain:       MDK-Lite  Version: 5.21a
-Toolchain Path:  E:\EmbededSystemTools\keil5\ARM\ARMCC\Bin
+Toolchain Path:  D:\MKD5.21\ARM\ARMCC\Bin
 C Compiler:      Armcc.exe V5.06 update 3 (build 300)
 Assembler:       Armasm.exe V5.06 update 3 (build 300)
 Linker/Locator:  ArmLink.exe V5.06 update 3 (build 300)
@@ -21,22 +21,30 @@ Target DLL:      STLink\ST-LINKIII-KEIL_SWO.dll V2.0.18.0
 Dialog DLL:      TCM.DLL V1.14.14.0
  
 <h2>Project:</h2>
-E:\2025SpringSemester\EmbeddedSystemExp\RemoteControlAirConditioner\MDK-ARM\RCAC.uvprojx
-Project File Date:  06/04/2025
+C:\Users\lenovo\Downloads\RemoteControlAirConditioner\MDK-ARM\RCAC.uvprojx
+Project File Date:  06/06/2025
 
 <h2>Output:</h2>
-*** Using Compiler 'V5.06 update 3 (build 300)', folder: 'E:\EmbededSystemTools\keil5\ARM\ARMCC\Bin'
+*** Using Compiler 'V5.06 update 3 (build 300)', folder: 'D:\MKD5.21\ARM\ARMCC\Bin'
 Build target 'RCAC'
 compiling main.c...
+../Inc/sysSecurity.h(18): warning:  #1295-D: Deprecated declaration initSystemState - give arg types
+  void initSystemState(); // å¤?å¤?ä»?åŠ?è½?å¤?è´?ä½?ç”?init
+../Inc/sysSecurity.h(20): warning:  #1295-D: Deprecated declaration saveSystemState - give arg types
+  void saveSystemState();
+../Inc/sysSecurity.h(21): warning:  #1295-D: Deprecated declaration loadSystemState - give arg types
+  void loadSystemState();
 ../Inc/beep.h(6): warning:  #1-D: last line of file ends without a newline
   #endif
 ../Inc/led.h(10): warning:  #1-D: last line of file ends without a newline
   #endif
-../Src/main.c: 2 warnings, 0 errors
+../Inc/key.h(7): warning:  #1-D: last line of file ends without a newline
+  #endif
+../Src/main.c: 6 warnings, 0 errors
 linking...
-Program Size: Code=16540 RO-data=452 RW-data=32 ZI-data=1288  
+Program Size: Code=13244 RO-data=452 RW-data=28 ZI-data=4440  
 FromELF: creating hex file...
-"RCAC\RCAC.axf" - 0 Error(s), 2 Warning(s).
+"RCAC\RCAC.axf" - 0 Error(s), 6 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -47,9 +55,9 @@ Package Vendor: ARM
    * Component: CORE Version: 4.3.0
 
 <h2>Collection of Component include folders:</h2>
-  E:\2025SpringSemester\EmbeddedSystemExp\RemoteControlAirConditioner\MDK-ARM\RTE
-  E:\EmbededSystemTools\keil5\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include
-  E:\EmbededSystemTools\keil5\ARM\PACK\Keil\STM32F4xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include
+  C:\Users\lenovo\Downloads\RemoteControlAirConditioner\MDK-ARM\RTE
+  D:\MKD5.21\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include
+  D:\MKD5.21\ARM\PACK\Keil\STM32F4xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include
 
 <h2>Collection of Component Files used:</h2>
 
